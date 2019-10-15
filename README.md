@@ -10,6 +10,7 @@ Setup Python Code:
 Setup Github:
 - [Install Git][1]
 - [Github Desktop][2]
+- In VS Code Settings, Search for "Post Git Commit", Change to "Push"
 
 [1]:https://git-scm.com/download/win
 [2]:https://desktop.github.com/
