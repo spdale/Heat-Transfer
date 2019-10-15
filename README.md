@@ -4,11 +4,12 @@ Code for MAE 423 Heat Transfer (Fall 2019-20).
 ## Software Setup
 Setup Python Code: 
 - [Virtual Studio Code][3]
-- [Python][4] (Windows x86-64 executable installer)
+- [Python][4] (For Windows: "Windows x86-64 executable installer")
 - [Python Extension for VS Code][5]
 
 Setup Github:
-- [Install Git][1]
+- Windows: [Install Git][1]
+- Mac: Go to Terminal, enter the command "git --version". If you don't have git, Apple's XCode Extension will automatically prompt to be installed. 
 - [Github Desktop][2]
 - In VS Code Settings, search for "Post Git Commit", change to "Push".
 
@@ -43,5 +44,5 @@ To Post Code to Github:
 [1]:https://git-scm.com/download/win
 [2]:https://desktop.github.com/
 [3]:https://code.visualstudio.com/
-[4]:https://www.python.org/downloads/windows/
+[4]:https://www.python.org/downloads/
 [5]:https://marketplace.visualstudio.com/items?itemName=ms-python.python
