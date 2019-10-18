@@ -17,7 +17,7 @@ To Run Python Code:
 - Have the desired Python file open in VS Code (e.g. "PSet-3.py").
 - Hit the green play button to the right of the tabs.
 
-Recommended Setting:
+Recommended VS Code Setting:
 - File > Preferences > Keyboard Shortcuts
 - Search for "Python: Run Python File in Terminal".
 - Set this to "Shift + Enter".
