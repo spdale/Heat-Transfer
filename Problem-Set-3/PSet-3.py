@@ -64,7 +64,7 @@ x = np.linspace(0, 1, height)
 index = np.ceil(width / 2)
 y = data[:, index.astype(int)]
 plt.plot(x, y)
-plt.xlabel(r'$\mathrm{Position\ Along\ Width\ (Normalized)}$')
+plt.xlabel(r'$\mathrm{Position\ Along\ Height\ (Normalized)}$')
 plt.ylabel("Temperature (\N{DEGREE SIGN}C)")
 plt.title("Temperature Along Horizontally Centered Vertical Path of Data")
 plt.savefig("Problem-Set-3/images/pset-3-figure-2.png")
