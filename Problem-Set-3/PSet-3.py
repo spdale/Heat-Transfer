@@ -1,9 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# plt.axes().set_aspect('equal')
-# plt.style.use('classic')
-
 # Grid squares values:
 height = 21
 width = 31
