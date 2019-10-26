@@ -1,6 +1,13 @@
 # Heat-Transfer
 Code for MAE 423 Heat Transfer (Fall 2019-20). 
+***
 
+## Code Overview
+### P-Set 3
+Use Gauss-Seidel Iteration to relax the temperature to reach equilibrium for data points. "PSet-3.p<i></i>y" is the project code. "p-set-3-code.tex" compiles images into a PDF for printing.
+![alt text][p-set-3-final-image]
+
+---
 ## Software Setup
 Setup Python Code: 
 - [Virtual Studio Code][3]
@@ -46,3 +53,6 @@ To Post Code to Github:
 [3]:https://code.visualstudio.com/
 [4]:https://www.python.org/downloads/
 [5]:https://marketplace.visualstudio.com/items?itemName=ms-python.python
+
+
+[p-set-3-final-image]: https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-3/images/pset-3-figure-3-final.png "P Set 3 Image"
