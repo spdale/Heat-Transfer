@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 
 fileName = "Problem-Set-5"
 
+num_time_steps = 100
+delta = 1
+
 # Grid points:
 height = 30
 width = 30
@@ -12,73 +15,48 @@ rho = 3000  # kg/m^3
 c = 840     # J/(kg*C)
 h = 28      # W/(m^2*C)  Convective Heat Transfer Coefficient
 k = 5.2     # W/(m*C)    Thermal Conductivity
+alpha = k / (rho * c)
 
-# Make set temperatures on fixed positions
-T_alpha   = 0    # (bottom boundary temperature)
-T_bravo   = 40   # (left boundary temperature)
-T_charlie = 100  # (top boundary temperature)
-T_delta   = 100  # (right boundary temperature)
+#dt = k * (delta ^ 2) / (2 * h * delta + 4 * k)  # Characteristic time
+dt = (delta ^ 2) / (4 * alpha)
+Fo = alpha * dt / (delta ^ 2)   # Fourier Number
+Bi = h * delta / k              # Biot Number
 
-T_initial = 15
+T_initial = 10
 T_right = 38
+T_inf = 0
 
-
-# Initialize matrix of zeros for that size
-# Note: index 0,0 is bottom left
-#default_temp = (max(T_alpha, T_bravo, T_charlie, T_delta) + min(T_alpha, T_bravo, T_charlie, T_delta)) / 2
-#data = np.zeros((height, width)) + T_initial
-
+# Create array and initialize to T-initial
 data = np.zeros((width, height)) + T_initial
 
+# Set the right boundary to T_right
 for j in range(height):
     data[(width - 1), j] = T_right
 
 
-# data = [[0, 1, 2, 3, 4],
-#         [5, 6, 7, 8, 9]]
+for t in range(num_time_steps):
+    data_old = data.copy()
 
-# # for j in range(height):
-# #     for i in range(width):
-# #         print(data[i,j], end = ' ')
-# #     print("")
+    # Internal Nodes
+    for m in range(1, width - 1):
+        for n in range(1, height - 1):
+            data[m, n] = (data_old[m + 1, n] + data_old[m - 1, n] + data_old[m, n + 1] + data_old[m, n - 1]) / 4
+    
+    # Convective Boundary Nodes (Left)
+    for n in range(1, height - 1):
+        data[m, n] = Fo * (2 * Bi * (T_inf - data_old[m, n]) + 2 * data_old[m + 1, n] + data_old[m, n + 1] + data_old[m, n - 1] - 4 * data_old[m, n]) + data_old[m, n]
 
-# # print(np.flip(data))
-# print(data)
-# print(np.rot90(data))
+    # Insulated Boundary Noes (Top)
+    for m in range(1, width - 1):
+        data[m, 0] = Fo * (2 * data_old[m, n - 1] + data_old[m - 1, n] + data_old[m + 1, n]) + (1 - 4 * Fo) * data_old[m, n]
 
-# data = np.rot90(data)
-
-# Set boundary conditions
-# for i in range(width):
-#     data[i, 0] = T_alpha
-#     data[i, (height - 1)] = T_charlie
-# for j in range(1, (height - 1)):
-#     data[0, j] = T_bravo
-#     data[(width - 1), j] = T_delta
+    
 
 
-# error_flag = True
-# error_limit = 1e-4
-# while error_flag:
-#     large_error_term_found = False
 
-#     # Gauss-Seidel Iteration
-#     for n in range(1, (height - 1)):
-#         for m in range(1, (width - 1)): 
-#             data_old = data[n, m]
-#             data[n, m] = 0.25 * (data[(n + 1), m] + data[(n - 1), m] + data[n, (m + 1)] + data[n, (m - 1)])
+#print(np.rot90(data))
 
-#             if not large_error_term_found:
-#                 error_term = abs(data[n, m] - data_old) / data_old
-#                 if (error_term <= error_limit):
-#                     error_flag = False
-#                 else:
-#                     error_flag = True
-#                     large_error_term_found = True
-
-print(np.rot90(data))
-
-data_printable = np.flipud(np.rot90(data))
+data_printable = np.rot90(data) #np.flipud(np.rot90(data))
 
 figNum = 1
 plt.figure(figNum)
@@ -86,25 +64,25 @@ plt.axes().set_aspect('equal')
 plt.style.use('classic')
 heatmap = plt.pcolor(data_printable)
 
-plt.text(0.5, -0.02, "T = " + str(T_alpha) + "\N{DEGREE SIGN}C",
+plt.text(0.5, -0.02, "T = " + str(T_initial) + "\N{DEGREE SIGN}C",
          horizontalalignment='center',
          verticalalignment='top',
          rotation=0,
          clip_on=False,
          transform=plt.gca().transAxes)
-plt.text(0, 0.5, "T = " + str(T_bravo) + "\N{DEGREE SIGN}C",
+plt.text(0, 0.5, "Convective Boundary",
          horizontalalignment='right',
          verticalalignment='center',
          rotation=90,
          clip_on=False,
          transform=plt.gca().transAxes)
-plt.text(0.5, 1, "T = " + str(T_charlie) + "\N{DEGREE SIGN}C",
+plt.text(0.5, 1, "Insulated Surface",
          horizontalalignment='center',
          verticalalignment='bottom',
          rotation=0,
          clip_on=False,
          transform=plt.gca().transAxes)
-plt.text(1, 0.5, "T = " + str(T_delta) + "\N{DEGREE SIGN}C",
+plt.text(1, 0.5, "T = " + str(T_right) + "\N{DEGREE SIGN}C",
          horizontalalignment='left',
          verticalalignment='center',
          rotation=270,
@@ -118,7 +96,7 @@ plt.ylim(0, height)
 
 cbar = plt.colorbar(heatmap)
 cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
-plt.clim(0, 100)
+plt.clim(0, 50)
 
 plt.savefig(fileName + "/images/" + fileName + "-" + str(figNum) + ".png")
 plt.show()
