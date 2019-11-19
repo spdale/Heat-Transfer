@@ -6,14 +6,17 @@ Code for MAE 423 Heat Transfer (Fall 2019-20).
 
 ### P-Set 3
 Use Gauss-Seidel Iteration to relax the temperature to reach equilibrium for data points. "PSet-3.p<i></i>y" is the project code. "p-set-3-code.tex" compiles images and the code into a PDF for printing.
-![alt text][p-set-3-final-image]
+
+<p align="center">
+<img alt="PSet-3 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-3/images/pset-3-figure-3-final.png">
+</p>
 
 ### P-Set 5
 Numerically solve a specified grid for temperature across time-steps until reaching steady-state using finite difference approximations. This problem has unsteady heat conduction with an insulated boundary, convective boundary, and two boundaries maintained at constant temperature. 
 "PSet-5.p<i></i>y" is the project code. "PSet-5-Print.tex" compiles images and the code into a PDF for printing.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-5/images/Problem-Set-5-1.png">
+<img alt="PSet-5 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-5/images/Problem-Set-5-1.png">
 </p>
 
 ---
@@ -62,8 +65,3 @@ To Post Code to Github:
 [3]:https://code.visualstudio.com/
 [4]:https://www.python.org/downloads/
 [5]:https://marketplace.visualstudio.com/items?itemName=ms-python.python
-
-
-[p-set-3-final-image]: https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-3/images/pset-3-figure-3-final.png "P Set 3 Image"
-
-[p-set-5-final-image]: https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-5/images/Problem-Set-5-1.png "P Set 5 Image"
