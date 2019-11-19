@@ -11,8 +11,9 @@ Use Gauss-Seidel Iteration to relax the temperature to reach equilibrium for dat
 ### P-Set 5
 Numerically solve a specified grid for temperature across time-steps until reaching steady-state using finite difference approximations. This problem has unsteady heat conduction with an insulated boundary, convective boundary, and two boundaries maintained at constant temperature. 
 "PSet-5.p<i></i>y" is the project code. "PSet-5-Print.tex" compiles images and the code into a PDF for printing.
-
+<center>
 ![alt text][p-set-5-final-image]
+</center>
 
 ---
 ## Software Setup
