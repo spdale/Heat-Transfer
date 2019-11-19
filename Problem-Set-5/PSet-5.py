@@ -17,8 +17,8 @@ h = 28      # W/(m^2*C)  Convective Heat Transfer Coefficient
 k = 5.2     # W/(m*C)    Thermal Conductivity
 alpha = k / (rho * c)
 
-#dt = k * (delta ^ 2) / (2 * h * delta + 4 * k)  # Characteristic time
-dt = (delta ^ 2) / (4 * alpha)
+dt = k * (delta ^ 2) / (2 * h * delta + 4 * k)  # Characteristic time
+#dt = (delta ^ 2) / (4 * alpha)
 Fo = alpha * dt / (delta ^ 2)   # Fourier Number
 Bi = h * delta / k              # Biot Number
 
@@ -44,13 +44,13 @@ for t in range(num_time_steps):
     
     # Convective Boundary Nodes (Left)
     for n in range(1, height - 1):
+        m = 0
         data[m, n] = Fo * (2 * Bi * (T_inf - data_old[m, n]) + 2 * data_old[m + 1, n] + data_old[m, n + 1] + data_old[m, n - 1] - 4 * data_old[m, n]) + data_old[m, n]
 
     # Insulated Boundary Noes (Top)
     for m in range(1, width - 1):
         data[m, 0] = Fo * (2 * data_old[m, n - 1] + data_old[m - 1, n] + data_old[m + 1, n]) + (1 - 4 * Fo) * data_old[m, n]
 
-    
 
 
 
@@ -96,7 +96,7 @@ plt.ylim(0, height)
 
 cbar = plt.colorbar(heatmap)
 cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
-plt.clim(0, 50)
+plt.clim(0, T_right)
 
 plt.savefig(fileName + "/images/" + fileName + "-" + str(figNum) + ".png")
 plt.show()
