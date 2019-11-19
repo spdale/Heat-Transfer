@@ -11,16 +11,16 @@ height = 30
 width = 30
 
 # Constants
-rho = 3000  # kg/m^3
-c = 840     # J/(kg*C)
-h = 28      # W/(m^2*C)  Convective Heat Transfer Coefficient
-k = 5.2     # W/(m*C)    Thermal Conductivity
-alpha = k / (rho * c)
+rho = 3000              # kg/m^3
+c = 840                 # J/(kg*C)
+h = 28                  # W/(m^2*C)  Convective Heat Transfer Coefficient
+k = 5.2                 # W/(m*C)    Thermal Conductivity
+alpha = k / (rho * c)   # m^2/s      Thermal Diffusivity
 
 dt = k * (delta ^ 2) / (2 * h * delta + 4 * k)  # Characteristic time
 #dt = (delta ^ 2) / (4 * alpha)
-Fo = alpha * dt / (delta ^ 2)   # Fourier Number
-Bi = h * delta / k              # Biot Number
+Fo = alpha * dt / (delta ^ 2)                   # Fourier Number
+Bi = h * delta / k                              # Biot Number
 
 T_initial = 10
 T_right = 38
@@ -53,7 +53,7 @@ for t in range(num_time_steps):
 
 
 
-
+# Print the data in the console (readable format)
 #print(np.rot90(data))
 
 data_printable = np.rot90(data) #np.flipud(np.rot90(data))
@@ -96,7 +96,7 @@ plt.ylim(0, height)
 
 cbar = plt.colorbar(heatmap)
 cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
-plt.clim(0, T_right)
+plt.clim(0, np.amax(data))
 
 plt.savefig(fileName + "/images/" + fileName + "-" + str(figNum) + ".png")
 plt.show()
