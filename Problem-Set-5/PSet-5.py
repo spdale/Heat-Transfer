@@ -10,6 +10,8 @@ delta = 0.01            # 1 cm
 height = 30
 width = 30
 
+side_length = 0.30      # meters
+
 # Constants
 rho = 3000              # kg/m^3
 c = 840                 # J/(kg*C)
@@ -115,15 +117,38 @@ x = dt * np.linspace(0, (len(history) - 1), len(history))
 plt.plot(x, y)
 plt.xlabel("Time (s)")
 plt.ylabel("Temperature (\N{DEGREE SIGN}C)")
-plt.suptitle("Temperature At Specific Point Until Steady State Reached")
-plt.title("Halfway Up Convective Boundary")
+plt.suptitle("Temperature At A Specific Point (Halfway Up Convective")
+plt.title("Boundary) Until Steady State Reached")
+plt.xlim(0, max(x))
+plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+plt.show()
+
+figNum = 4
+plt.figure(figNum)
+q = []
+for state_num in range(1, len(history)):
+    m = 0
+    delta_T= 0
+    for n in range(height):
+        delta_T += history[state_num][m, n] - history[state_num - 1][m, n]
+    
+    q_total_state = h * side_length * delta_T
+
+    q.append(q_total_state)
+
+x = dt * np.linspace(0, (len(q) - 1), len(q))
+plt.plot(x, q)
+plt.xlabel("Time (s)")
+plt.ylabel("Total Heat (J/m)")
+plt.title("Total Heat Convected Across the Convective Boundary")
 plt.xlim(0, max(x))
 plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
 plt.show()
 
 
 
-figNum = 4
+
+figNum = 5
 plt.figure(figNum)
 plt.axes().set_aspect('equal')
 plt.style.use('classic')
