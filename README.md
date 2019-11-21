@@ -16,7 +16,7 @@ Numerically solve a specified grid for temperature across time-steps until reach
 "PSet-5.p<i></i>y" is the project code. "PSet-5-Print.tex" compiles images and the code into a PDF for printing.
 
 <p align="center">
-<img alt="PSet-5 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-5/images/Problem-Set-5-1.png">
+<img alt="PSet-5 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-5/images/Problem-Set-5-Figure-3.png">
 </p>
 
 ---
