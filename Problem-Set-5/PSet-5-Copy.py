@@ -28,7 +28,9 @@ T_initial = 10
 T_right = 38
 T_inf = 0
 
-
+##########################################################
+# 100 Time Steps
+##########################################################
 # Create array and initialize to T-initial
 data = np.zeros((width, height)) + T_initial
 
@@ -59,16 +61,10 @@ for t in range(num_time_steps):
     n = height - 1
     data[m, n] = 2 * Fo * (data_old[m + 1, n] + data_old[m, n - 1] - 2 * data_old[m, n] + 2 * Bi * (T_inf - data_old[m, n])) + data_old[m, n]
 
-
-
-# Create array and initialize to T-initial
-data = np.zeros((width, height)) + T_initial
-
-# Set the right boundary to T_right
-for j in range(height):
-    data[(width - 1), j] = T_right
-
-history = [data.copy()]
+##########################################################
+# Reach Steady State
+##########################################################
+history = 
 
 error_flag = True
 error_limit = 1e-4
@@ -97,17 +93,18 @@ while error_flag:
     n = height - 1
     data[m, n] = 2 * Fo * (data_old[m + 1, n] + data_old[m, n - 1] - 2 * data_old[m, n] + 2 * Bi * (T_inf - data_old[m, n])) + data_old[m, n]
 
+            data_old = data[m, n]
 
-    # Check if reached steady state
-    if not large_error_term_found:
-        error_term = abs(data[m, n] - data_old[m, n]) / data_old[m, n]
-        if (error_term <= error_limit):
-            error_flag = False
-        else:
-            error_flag = True
-            large_error_term_found = True
+            if not large_error_term_found:
+                error_term = abs(data[n, m] - data_old) / data_old
+                if (error_term <= error_limit):
+                    error_flag = False
+                else:
+                    error_flag = True
+                    large_error_term_found = True
 
-    history.append(data.copy())
+
+
 
 print(len(history))
 
@@ -117,12 +114,11 @@ print(len(history))
 figNum = 1
 plt.figure(figNum)
 x = np.linspace(0, 1, height)
-y = history[num_time_steps][0, :]
+y = data[0, :]
 plt.plot(x, y)
 plt.xlabel("Position Along Left Convective Boundary (Normalized)")
 plt.ylabel("Temperature (\N{DEGREE SIGN}C)")
-plt.suptitle("Temperature Along the Left Convective Boundary")
-plt.title("Bottom to Top; 100 Time Steps")
+plt.title("Temperature Along the Left Convective Boundary (Bottom to Top)")
 plt.xlim(0, 1)
 plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
 plt.show()
@@ -130,35 +126,16 @@ plt.show()
 figNum = 2
 plt.figure(figNum)
 x = np.linspace(0, 1, width-1)
-y = history[num_time_steps][0:(width-1), height - 1]
+y = data[0:(width-1), height - 1]
 plt.plot(x, y)
 plt.xlabel("Position Along Insulated Surface Boundary (Normalized)")
 plt.ylabel("Temperature (\N{DEGREE SIGN}C)")
-plt.suptitle("Temperature Along the Insulated Surface Boundary")
-plt.title("Left to Right; 100 Time Steps")
+plt.title("Temperature Along the Insulated Surface Boundary (Left to Right)")
 plt.xlim(0, 1)
 plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
 plt.show()
 
 figNum = 3
-plt.figure(figNum)
-history_length = len(history)
-y = []
-for i in history:
-    y.append(i[0, 15])
-x = dt * np.linspace(0, (len(history) - 1), len(history))
-plt.plot(x, y)
-plt.xlabel("Time (s)")
-plt.ylabel("Temperature (\N{DEGREE SIGN}C)")
-plt.suptitle("Temperature At Specific Point Until Steady State Reached")
-plt.title("Halfway Up Convective Boundary")
-plt.xlim(0, max(x))
-plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
-plt.show()
-
-
-
-figNum = 4
 plt.figure(figNum)
 plt.axes().set_aspect('equal')
 plt.style.use('classic')
