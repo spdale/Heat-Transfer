@@ -26,39 +26,6 @@ T_initial = 10
 T_right = 38
 T_inf = 0
 
-
-# Create array and initialize to T-initial
-data = np.zeros((width, height)) + T_initial
-
-# Set the right boundary to T_right
-for j in range(height):
-    data[(width - 1), j] = T_right
-
-for t in range(num_time_steps):
-    data_old = data.copy()
-
-    # Internal Nodes
-    for m in range(1, width - 1):
-        for n in range(1, height - 1):
-            data[m, n] = alpha * dt / (delta * delta) * (data_old[m + 1, n] + data_old[m - 1, n] + data_old[m, n + 1] + data_old[m, n - 1]) + (1 - 4 * alpha * dt / (delta * delta)) * data_old[m, n]
-
-    # Convective Boundary Nodes (Left)
-    for n in range(1, height - 1):
-        m = 0
-        data[m, n] = Fo * (2 * Bi * (T_inf - data_old[m, n]) + 2 * data_old[m + 1, n] + data_old[m, n + 1] + data_old[m, n - 1] - 4 * data_old[m, n]) + data_old[m, n]
-
-    # Insulated Boundary Nodes (Top)
-    for m in range(1, width - 1):
-        n = height - 1
-        data[m, n] = Fo * (2 * data_old[m, n - 1] + data_old[m - 1, n] + data_old[m + 1, n]) + (1 - 4 * Fo) * data_old[m, n]
-
-    # Exterior Corner with Convection Boundary
-    m = 0
-    n = height - 1
-    data[m, n] = 2 * Fo * (data_old[m + 1, n] + data_old[m, n - 1] - 2 * data_old[m, n] + 2 * Bi * (T_inf - data_old[m, n])) + data_old[m, n]
-
-
-
 # Create array and initialize to T-initial
 data = np.zeros((width, height)) + T_initial
 
