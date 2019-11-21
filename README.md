@@ -76,7 +76,4 @@ Helpful Git Terms:
 [4]:https://www.python.org/downloads/
 [5]:https://marketplace.visualstudio.com/items?itemName=ms-python.python
 [6]:mailto:sdale@princeton.edu
-
-[7]:/settings/collaboration
-
-[9]:https://github.com/sdale28/MAE-322-DynaSaRR/settings/collaboration
+[7]:https://github.com/sdale28/Heat-Transfer/settings/collaboration
