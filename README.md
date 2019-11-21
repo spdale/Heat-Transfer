@@ -53,15 +53,30 @@ To Make Sure Code is Up to Date:
 - On left menu, click on the three connected points that branch ("Source Control"). 
 - Click three dot icon to the right of the checkmark and refresh arrow ("More Actions").
 - Select "Pull". 
-- (If you want to force reset back to the version that is stored on Github: "Pull (rebase)". Not that this overwrites all changes you've made locally). 
+- (If you want to force reset back to the version that is stored on Github: "Pull (rebase)". Note that this overwrites all changes you've made locally). 
 
-To Post Code to Github: 
+To Become a Contributor to the GitHub Repo:
+- [Send Sam][6] your GitHub username to contribute to the code. Here's the [link for Sam][7] to add collaborators.
+
+To Post Code to GitHub: 
+ - Always "push" your code at the end of your programming session! Otherwise no one can see your code changes and if something happens to your computer, the code is lost forever.
 - On left menu, click on the three connected points that branch ("Source Control"). 
 - Put note in textbox (usually required in Git, example "Added color bar to plot"). 
 - Click checkmark (or "Ctrl + Enter" in message text area). 
+
+Helpful Git Terms:
+ - Repo = repository: the folder of all of the files in the project.
+ - Push = Push all local branch commits to the repository branch on the GitHub servers.
+ - Commit = Record snapshot of files in repository (permanently available in version history). 
+ - Pull = Download and incorporate changes.
 
 [1]:https://git-scm.com/download/win
 [2]:https://desktop.github.com/
 [3]:https://code.visualstudio.com/
 [4]:https://www.python.org/downloads/
 [5]:https://marketplace.visualstudio.com/items?itemName=ms-python.python
+[6]:mailto:sdale@princeton.edu
+
+[7]:/settings/collaboration
+
+[9]:https://github.com/sdale28/MAE-322-DynaSaRR/settings/collaboration
