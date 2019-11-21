@@ -144,8 +144,8 @@ figNum = 3
 plt.figure(figNum)
 history_length = len(history)
 y = []
-for i in history:
-    y.append(i[0, 15])
+for state in history:
+    y.append(state[0, 15])
 x = dt * np.linspace(0, (len(history) - 1), len(history))
 plt.plot(x, y)
 plt.xlabel("Time (s)")
