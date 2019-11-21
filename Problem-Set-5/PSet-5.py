@@ -22,8 +22,6 @@ dt_2 = (delta  * delta) / (4 * alpha)                       # Characteristic tim
 dt = min(dt_1, dt_2)
 Fo = alpha * dt / (delta * delta)                           # Fourier Number
 Bi = h * delta / k                                          # Biot Number
-print(dt_1)
-print(dt_2)
 T_initial = 10
 T_right = 38
 T_inf = 0
@@ -109,7 +107,7 @@ while error_flag:
 
     history.append(data.copy())
 
-print(len(history))
+#print(len(history))
 
 # Print the data in the console (readable format)
 #print(np.rot90(data))
