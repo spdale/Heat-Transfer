@@ -136,10 +136,16 @@ for state_num in range(len(history)):
     q_total_state = h * side_length * delta_T
     q.append(q_total_state)
 
+for time_step in range(1, len(q)):
+    q[time_step] += q[time_step - 1]
+
+# Convert to MJ: 
+q[:] = [x / (10 ** 6) for x in q]
+
 x = dt * np.linspace(0, (len(q) - 1), len(q))
 plt.plot(x, q)
 plt.xlabel("Time (s)")
-plt.ylabel("Total Heat (J/m)")
+plt.ylabel("Total Heat (MJ/m)")
 plt.title("Total Heat Convected Across the Convective Boundary")
 plt.xlim(0, max(x))
 plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
