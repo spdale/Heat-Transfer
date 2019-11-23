@@ -123,17 +123,17 @@ plt.xlim(0, max(x))
 plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
 plt.show()
 
+
 figNum = 4
 plt.figure(figNum)
 q = []
-for state_num in range(1, len(history)):
+for state_num in range(len(history)):
     m = 0
-    delta_T= 0
+    delta_T = 0
     for n in range(height):
-        delta_T += history[state_num][m, n] - history[state_num - 1][m, n]
+        delta_T += history[state_num][m, n] - T_inf
     
     q_total_state = h * side_length * delta_T
-
     q.append(q_total_state)
 
 x = dt * np.linspace(0, (len(q) - 1), len(q))
@@ -144,7 +144,6 @@ plt.title("Total Heat Convected Across the Convective Boundary")
 plt.xlim(0, max(x))
 plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
 plt.show()
-
 
 
 
