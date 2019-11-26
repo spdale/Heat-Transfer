@@ -11,11 +11,11 @@ cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
 cylinder_center = [(height / 2), 100]
 
-error_limit = 0.01 #0.01      # 1% maximum change for convergence
+error_limit = 0.1 #0.01      # 1% maximum change for convergence
 
 U_inf = 2               # m/s uniform inflow
 F = 1.5                 # over-relaxation factor
-free_lid = 5*(10**(-3))           # free-lid vorticity constant
+free_lid = 5          # free-lid vorticity constant
 
 rho = 3000              # kg/m^3
 c = 840                 # J/(kg*C)
@@ -41,13 +41,6 @@ def in_circle(x, y):
         return True
     return False
 
-def is_fixed(x, y):
-    if (y == cylinder_center[1]):
-        return True 
-    if in_circle(x, y):
-        return True
-    return False
-
 for i in range(width):
     for j in range(height):
         if in_circle(i, j):
@@ -63,7 +56,6 @@ for i in range(width):
     for j in range(height):
         if (j != cylinder_center[1]) and not in_circle(i, j):
             psi[i, j] = U_inf * abs(j - cylinder_center[1]) * h + free_lid
-            #psi[i, j] = U_inf * abs(j - (height / 2)) * h + free_lid
 
 error_flag = True
 while error_flag:
@@ -76,17 +68,12 @@ while error_flag:
 
             # if (i == 0):
             #     psi[i, j] = psi[i + 1, j]
-            # elif (i == width - 1):
+            # elif (i == width):
             #     psi[i, j] = psi[i - 1, j]
-            if not is_fixed(i, j):
+            if (j != cylinder_center[1]) and not in_circle(i, j):
                 psi[i, j] = psi[i, j] + (F / 4) * (psi[i + 1, j] + psi[i - 1, j] + psi[i, j + 1] + psi[i, j - 1] - 4 * psi[i, j])
-                
-            if (i == 1):
-                psi[0, j] = psi[i + 2, j]
-            elif (i == (width - 2)):
-                psi[i + 1, j] = psi[i, j]
 
-            if not large_error_term_found and not is_fixed(i, j):
+            if not large_error_term_found:
                 error_term = abs(psi[i, j] - psi_old) / psi_old
                 if (error_term <= error_limit):
                     error_flag = False
@@ -105,29 +92,16 @@ while error_flag:
 figNum = 1
 plt.figure(figNum)
 plt.axes().set_aspect('equal')
-#plt.style.use('classic')
+plt.style.use('classic')
 data_graphable = np.flipud(np.rot90(psi))
-#heatmap = plt.pcolor(data_graphable)
-
-
-num_streamlines = 15
-max_streamline = np.max(data_graphable)
-contours = np.linspace(max_streamline, 1, num=num_streamlines)
-#print(contours)
-#contours = [1/max_streamline:1] * max(data_graphable)
-
-
-
-#plt.contour(data_graphable, levels = contours, colors = 'black')
-contour_output = plt.contour(data_graphable, colors = 'black')
-print(contour_output.Levels)
+heatmap = plt.pcolor(data_graphable)
 
 plt.axis("off")
 
 plt.xlim(0, width)
 plt.ylim(0, height)
 
-#plt.clim(np.amin(psi), np.amax(psi))
+plt.clim(np.amin(psi), np.amax(psi))
 #plt.clim(0, 100)
 
 plt.savefig(fileName + "/images/" + fileName + "-Figure.png")

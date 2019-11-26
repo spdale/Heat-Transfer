@@ -108,19 +108,7 @@ plt.axes().set_aspect('equal')
 #plt.style.use('classic')
 data_graphable = np.flipud(np.rot90(psi))
 #heatmap = plt.pcolor(data_graphable)
-
-
-num_streamlines = 15
-max_streamline = np.max(data_graphable)
-contours = np.linspace(max_streamline, 1, num=num_streamlines)
-#print(contours)
-#contours = [1/max_streamline:1] * max(data_graphable)
-
-
-
-#plt.contour(data_graphable, levels = contours, colors = 'black')
-contour_output = plt.contour(data_graphable, colors = 'black')
-print(contour_output.Levels)
+plt.contour(data_graphable, colors = 'black')
 
 plt.axis("off")
 
