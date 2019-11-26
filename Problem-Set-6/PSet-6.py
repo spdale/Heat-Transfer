@@ -1,14 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-fileName = "Problem-Set-5"
+fileName = "Problem-Set-6"
 
 num_time_steps = 100
 delta = 0.01            # 1 cm
 
 # Grid points:
-height = 30
-width = 30
+height = 200
+width = 500
+
+diameter = 50           # Diameter Cylinder
+
+side_length = 0.30      # meters
 
 # Constants
 rho = 3000              # kg/m^3
@@ -22,15 +26,10 @@ dt_2 = (delta  * delta) / (4 * alpha)                       # Characteristic tim
 dt = min(dt_1, dt_2)
 Fo = alpha * dt / (delta * delta)                           # Fourier Number
 Bi = h * delta / k                                          # Biot Number
-print(dt_1)
-print(dt_2)
 T_initial = 10
 T_right = 38
 T_inf = 0
 
-##########################################################
-# 100 Time Steps
-##########################################################
 # Create array and initialize to T-initial
 data = np.zeros((width, height)) + T_initial
 
@@ -38,33 +37,7 @@ data = np.zeros((width, height)) + T_initial
 for j in range(height):
     data[(width - 1), j] = T_right
 
-for t in range(num_time_steps):
-    data_old = data.copy()
-
-    # Internal Nodes
-    for m in range(1, width - 1):
-        for n in range(1, height - 1):
-            data[m, n] = alpha * dt / (delta * delta) * (data_old[m + 1, n] + data_old[m - 1, n] + data_old[m, n + 1] + data_old[m, n - 1]) + (1 - 4 * alpha * dt / (delta * delta)) * data_old[m, n]
-
-    # Convective Boundary Nodes (Left)
-    for n in range(1, height - 1):
-        m = 0
-        data[m, n] = Fo * (2 * Bi * (T_inf - data_old[m, n]) + 2 * data_old[m + 1, n] + data_old[m, n + 1] + data_old[m, n - 1] - 4 * data_old[m, n]) + data_old[m, n]
-
-    # Insulated Boundary Nodes (Top)
-    for m in range(1, width - 1):
-        n = height - 1
-        data[m, n] = Fo * (2 * data_old[m, n - 1] + data_old[m - 1, n] + data_old[m + 1, n]) + (1 - 4 * Fo) * data_old[m, n]
-
-    # Exterior Corner with Convection Boundary
-    m = 0
-    n = height - 1
-    data[m, n] = 2 * Fo * (data_old[m + 1, n] + data_old[m, n - 1] - 2 * data_old[m, n] + 2 * Bi * (T_inf - data_old[m, n])) + data_old[m, n]
-
-##########################################################
-# Reach Steady State
-##########################################################
-history = 
+history = [data.copy()]
 
 error_flag = True
 error_limit = 1e-4
@@ -93,49 +66,25 @@ while error_flag:
     n = height - 1
     data[m, n] = 2 * Fo * (data_old[m + 1, n] + data_old[m, n - 1] - 2 * data_old[m, n] + 2 * Bi * (T_inf - data_old[m, n])) + data_old[m, n]
 
-            data_old = data[m, n]
 
-            if not large_error_term_found:
-                error_term = abs(data[n, m] - data_old) / data_old
-                if (error_term <= error_limit):
-                    error_flag = False
-                else:
-                    error_flag = True
-                    large_error_term_found = True
+    # Check if reached steady state
+    if not large_error_term_found:
+        error_term = abs(data[m, n] - data_old[m, n]) / data_old[m, n]
+        if (error_term <= error_limit):
+            error_flag = False
+        else:
+            error_flag = True
+            large_error_term_found = True
 
+    history.append(data.copy())
 
-
-
-print(len(history))
+#print(len(history))
 
 # Print the data in the console (readable format)
 #print(np.rot90(data))
 
+
 figNum = 1
-plt.figure(figNum)
-x = np.linspace(0, 1, height)
-y = data[0, :]
-plt.plot(x, y)
-plt.xlabel("Position Along Left Convective Boundary (Normalized)")
-plt.ylabel("Temperature (\N{DEGREE SIGN}C)")
-plt.title("Temperature Along the Left Convective Boundary (Bottom to Top)")
-plt.xlim(0, 1)
-plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
-plt.show()
-
-figNum = 2
-plt.figure(figNum)
-x = np.linspace(0, 1, width-1)
-y = data[0:(width-1), height - 1]
-plt.plot(x, y)
-plt.xlabel("Position Along Insulated Surface Boundary (Normalized)")
-plt.ylabel("Temperature (\N{DEGREE SIGN}C)")
-plt.title("Temperature Along the Insulated Surface Boundary (Left to Right)")
-plt.xlim(0, 1)
-plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
-plt.show()
-
-figNum = 3
 plt.figure(figNum)
 plt.axes().set_aspect('equal')
 plt.style.use('classic')
@@ -176,5 +125,5 @@ cbar = plt.colorbar(heatmap)
 cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
 plt.clim(np.amin(data), np.amax(data))
 
-plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+plt.savefig(fileName + "/images/" + fileName + "-Figure.png")
 plt.show()
