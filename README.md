@@ -19,6 +19,14 @@ Numerically solve a specified grid for temperature across time-steps until reach
 <img alt="PSet-5 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-5/images/Problem-Set-5-Figure-5.png">
 </p>
 
+### P-Set 6
+Establish an initial flow around the circular cylinder. Use the boundary conditions: uniform inflow, straight streamlines for the upper and lower lids, and a uniform velocity for the outflow. Solve the potential flow equations (∇ψ<sup>2</sup>=0) for the bulk flow, using a convergence of less than 1% change for ψ.
+"PSet-6.p<i></i>y" is the project code. "PSet-6-Print.tex" compiles the image and the code into a PDF for printing.
+
+<p align="center">
+<img alt="PSet-6 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-6/images/Problem-Set-6-Figure.png">
+</p>
+
 ---
 ## Software Setup
 Setup Python Code: 
