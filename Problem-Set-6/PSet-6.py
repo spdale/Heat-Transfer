@@ -15,7 +15,7 @@ error_limit = 0.01      # 1% maximum change for convergence
 
 U_inf = 2               # m/s uniform inflow
 F = 1.5                 # over-relaxation factor
-free_lid = 5*(10**(-3))           # free-lid vorticity constant
+free_lid = 5*(10**(-4)) # free-lid vorticity constant
 
 rho = 3000              # kg/m^3
 c = 840                 # J/(kg*C)
@@ -96,6 +96,10 @@ while error_flag:
 # Print the data in the console (readable format)
 # print(np.rot90(psi))
 
+# dpi = 300
+# img_width = 3000
+# img_height = 1500
+# plt.figure(figsize=(img_width/dpi, img_height/dpi), dpi=dpi)
 
 figNum = 1
 fig = plt.figure(figNum)
