@@ -11,7 +11,7 @@ cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
 cylinder_center = [(height / 2), 100]
 
-error_limit = 0.01      # 1% maximum change for convergence
+error_limit = 0.01 #0.01      # 1% maximum change for convergence
 
 U_inf = 2               # m/s uniform inflow
 F = 1.5                 # over-relaxation factor
@@ -42,10 +42,6 @@ def in_circle(x, y):
     return False
 
 def is_fixed(x, y):
-    if (y == 0):
-        return True
-    if (y == (height - 1)):
-        return True
     if (y == cylinder_center[1]):
         return True 
     if in_circle(x, y):
@@ -61,12 +57,10 @@ for i in range(width):
     psi[i, 0] = -free_lid
     psi[i, (height - 1)] = free_lid
 
-# establish initial uniform gradient in psi
 for i in range(width):
     for j in range(height):
-        if not is_fixed(i, j):
-            psi[i, j] = (2 * j / (height - 1)) * free_lid - free_lid
-
+        if (j != cylinder_center[1]) and not in_circle(i, j):
+            psi[i, j] = U_inf * abs(j - cylinder_center[1]) * h + free_lid
 
 error_flag = True
 while error_flag:
@@ -77,6 +71,10 @@ while error_flag:
         for j in range(1, height - 1): 
             psi_old = psi[i, j]
 
+            # if (i == 0):
+            #     psi[i, j] = psi[i + 1, j]
+            # elif (i == width - 1):
+            #     psi[i, j] = psi[i - 1, j]
             if not is_fixed(i, j):
                 psi[i, j] = psi[i, j] + (F / 4) * (psi[i + 1, j] + psi[i - 1, j] + psi[i, j + 1] + psi[i, j - 1] - 4 * psi[i, j])
                 
@@ -93,34 +91,66 @@ while error_flag:
                     error_flag = True
                     large_error_term_found = True
 
+
 # Print the data in the console (readable format)
 # print(np.rot90(psi))
 
 
+
+
+
 figNum = 1
 fig = plt.figure(figNum)
+#fig, ax1 = plt.subplot(figNum)
 plt.axes().set_aspect('equal')
 data_graphable = np.flipud(np.rot90(psi))
 
 
-num_streamlines = 31
+num_streamlines = 15
 max_streamline = np.max(data_graphable)
-min_streamline = np.min(data_graphable)
-contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
-contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
+contours = np.linspace(max_streamline, 1, num=num_streamlines)
+#print(contours)
+#contours = [1/max_streamline:1] * max(data_graphable)
 
-plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
+
+
+#plt.contour(data_graphable, levels = contours, colors = 'black')
+contours = [0.001,
+            0.002,
+            0.003,
+            0.004, 
+            0.005,
+            0.0055,
+            0.00575,
+            0.006,
+            0.00625,
+            0.0065,
+            0.006625,
+            0.0066875,
+            0.00675]
+
+contour_output = plt.contour(data_graphable, levels = contours, colors = 'black')
 
 
 plt.xlim(0, width)
 plt.ylim(0, height)
 plt.xticks(np.arange(0, width + 1, 50))
 plt.yticks(np.arange(0, height + 1, 20))
+#ax2 = ax1.twinx()
 plt.tick_params(top=True, right=True)
 
-plt.style.use('grayscale')
+
+# grayscale
+
+plt.style.use('classic')
 heatmap = plt.pcolor(data_graphable)
+
+#cbar = plt.colorbar(heatmap)
+#cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
 plt.clim(np.amin(data_graphable), np.amax(data_graphable))
+
+
+
 
 plt.savefig(fileName + "/images/" + fileName + "-Figure.png")
 plt.show()

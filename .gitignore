@@ -4,3 +4,5 @@
 *.log
 *.lol
 *.synctex.gz
+.vscode
+.vscode/*
