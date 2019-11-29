@@ -96,11 +96,6 @@ while error_flag:
 # Print the data in the console (readable format)
 # print(np.rot90(psi))
 
-# dpi = 300
-# img_width = 3000
-# img_height = 1500
-# plt.figure(figsize=(img_width/dpi, img_height/dpi), dpi=dpi)
-
 figNum = 1
 fig = plt.figure(figNum)
 plt.axes().set_aspect('equal')
