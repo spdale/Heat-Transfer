@@ -14,9 +14,10 @@ cylinder_center = [(height / 2), 100]
 error_limit = 0.01      # 1% maximum change for convergence
 
 U_inf = 2               # m/s uniform inflow
-F = 1.5                 # over-relaxation factor
-free_lid = 5*(10**(-4)) # free-lid vorticity constant
+F = 1.9                 # over-relaxation factor
+free_lid = 5*(10**(-4)) # free-lid streamfunction constant
 
+# Constants picked for air around room temp
 rho = 3000              # kg/m^3
 c = 840                 # J/(kg*C)
 h = 28                  # W/(m^2*C)  Convective Heat Transfer Coefficient
@@ -123,3 +124,4 @@ plt.clim(np.amin(data_graphable), np.amax(data_graphable))
 
 plt.savefig(fileName + "/images/" + fileName + "-Figure.png")
 plt.show()
+
