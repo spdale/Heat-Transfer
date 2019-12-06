@@ -33,7 +33,7 @@ dt = (h / U_inf) / 2
 
 # Create array and initialize to T-initial
 omega = np.zeros((width, height))       # vorticity
-psi = np.zeros((width, height)) + 100   # streamfunction
+psi = np.zeros((width, height))         # streamfunction
 
 
 def in_circle(x, y): 
