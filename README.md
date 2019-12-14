@@ -27,6 +27,17 @@ Establish an initial flow around the circular cylinder. Use the boundary conditi
 <img alt="PSet-6 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-6/images/Problem-Set-6-Figure.png">
 </p>
 
+### Final Project
+Numerically simulate 2D unsteady heat convection from bodies of arbitrary geometry. Use the Streamfunction-Vorticity(ψ-ω) method for an unsteady, incompressible, viscous flow at relatively low Reynolds numbers (and negligible 3D effects).
+
+Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as the initial condition for the viscous simulation. Use the velocity (u,v) and vorticity (ω) fields as inputs into the unsteady energy equation (in finite-difference form) to determine the heat transfer and diffusion at each timestep. 
+
+"Final-Project.p<i></i>y" is the project code. "Final-Project.tex" compiles the image and the code into a PDF for printing.
+
+<p align="center">
+<img alt="PSet-6 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-6/images/Problem-Set-6-Figure.png">
+</p>
+
 ---
 ## Software Setup
 Setup Python Code: 
