@@ -115,6 +115,7 @@ def gauss_seidel_iteration(data, datatype, omega = ""):
 psi = gauss_seidel_iteration(psi, "psi")
 
 
+
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
@@ -213,7 +214,7 @@ for n in range(1, num_time_steps):
     temp_history.append(temp.copy())
 
 
-                
+
 
 ###############################################################
 #  Graphs and Plots
