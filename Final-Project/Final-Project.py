@@ -3,17 +3,16 @@ import matplotlib.pyplot as plt
 
 fileName = "Final-Project"
 
-# Grid points:
 height = 200
 width = 500
 
-num_time_steps = 10
+num_time_steps = 1
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
 cylinder_center = [(height / 2), 100]
 
-error_limit = 0.01      # 1% maximum change for convergence
+error_limit = 0.01                  # 1% maximum change for convergence
 
 U_inf = 2                           # m/s uniform inflow
 F = 1.9                             # over-relaxation factor
@@ -96,34 +95,13 @@ def is_outflow_boundary(x, y):
         return True
     return False
 
-def set_initial_conditions():
-    for i in range(width):
-        for j in range(height):
-            if in_circle(i, j):
-                psi[i, j] = 0
-                
-            # establish initial uniform gradient in psi
-            if not is_boundary_condition(i, j):
-                psi[i, j] = U_inf * j - free_lid
-
-            if solid_boundary(i, j):
-                temp[i, j] = T_surface
-
-        psi[i, cylinder_center[1]] = 0 
-        psi[i, 0] = -free_lid
-        psi[i, (height - 1)] = free_lid
-
-        omega[i, 0] = T_boundary
-        omega[i, (height - 1)] = T_boundary
-set_initial_conditions()
-
-def gauss_seidel_iteration(data, datatype, omega = ""):
+def gauss_seidel_iteration(data, omega = "", initial = False):
     """ 
     Perform Gauss-Seidel Iteration 
 
     @param data: 2D array (width, height) of values to be relaxed by Gauss-Seidel Iteration
-    @param datatype: either "psi" or "omega". Determines which Poisson/Laplacian equation will be used.
-    @param omega (necesary only for datatype "psi"): omega array used to calculate new psi.
+    @param omega (necesary not necessary for initial): omega array used to calculate new psi.
+    @param initial: Determines which Poisson/Laplacian equation will be used.
 
     @return: Data array post-relaxation iteration (same dimensions as @param data). 
     """
@@ -131,17 +109,16 @@ def gauss_seidel_iteration(data, datatype, omega = ""):
     while error_flag:
         large_error_term_found = False
 
-        # Gauss-Seidel Iteration
         for i in range(width):
             for j in range(height): 
                 datum_old = data[i, j]
 
                 if not is_boundary_condition(i, j):
                     datum_old = data[i, j]
-                    if datatype == "psi":
+                    if initial:
                         data[i, j] = data[i, j] + (F / 4) * (data[i + 1, j] + data[i - 1, j] + data[i, j + 1] + data[i, j - 1] - 4 * data[i, j])
-                    elif datatype == "omega":
-                        data[i, j] = data[i, j] + (F / 4) * (data[i + 1, j] + data[i - 1, j] + data[i, j + 1] + data[i, j - 1] + 4 * (h ** 2) * omega - 4 * psi[i, j]) 
+                    else:
+                        data[i, j] = data[i, j] + (F / 4) * (data[i + 1, j] + data[i - 1, j] + data[i, j + 1] + data[i, j - 1] + 4 * (h ** 2) * omega[i, j] - 4 * psi[i, j]) 
 
                     if not large_error_term_found:
                         error_term = abs((data[i, j] - datum_old) / datum_old)
@@ -152,7 +129,31 @@ def gauss_seidel_iteration(data, datatype, omega = ""):
                             large_error_term_found = True
     return data
 
-psi = gauss_seidel_iteration(psi, "psi")
+
+
+###############################################################
+#  Initial Conditions
+###############################################################
+for i in range(width):
+    for j in range(height):
+        if in_circle(i, j):
+            psi[i, j] = 0
+            
+        # establish initial uniform gradient in psi
+        if not is_boundary_condition(i, j):
+            psi[i, j] = U_inf * j - free_lid
+
+        if solid_boundary(i, j):
+            temp[i, j] = T_surface
+
+    psi[i, cylinder_center[1]] = 0 
+    psi[i, 0] = -free_lid
+    psi[i, (height - 1)] = free_lid
+
+    omega[i, 0] = T_boundary
+    omega[i, (height - 1)] = T_boundary
+
+psi = gauss_seidel_iteration(psi, initial = True)
 
 
 
@@ -189,8 +190,10 @@ for n in range(1, num_time_steps):
 
                 vorticity_laplacian = (omega[i + 1, j] + omega[i - 1, j] + omega[i, j + 1] + omega[i, j - 1] - 4 * omega[i, j]) / (h ** 2)
 
-                omega[i, j] = omega[i, j] + dt * (- delta_u_omega / h - delta_v_omega / h + v * vorticity_laplacian)
+                omega[i, j] = omega[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
 
+
+                psi = gauss_seidel_iteration(psi, omega)
 
 
                 u_delta_T = 0
@@ -227,9 +230,6 @@ for n in range(1, num_time_steps):
 ###############################################################
 #  Graphs and Plots
 ###############################################################
-
-figNum = 0
-
 def print_data_in_console():
     """ Print the data in the console (readable format) """
     print(np.rot90(psi))
@@ -237,9 +237,9 @@ def print_data_in_console():
 
 
 def plot_streamlines():
+    figNum = 1
     data_graphable = np.flipud(np.rot90(psi))
 
-    figNum += 1
     fig = plt.figure(figNum)
     plt.axes().set_aspect('equal')
 
@@ -265,13 +265,35 @@ def plot_streamlines():
 
     plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
     plt.show()
-# plot_streamlines()
+plot_streamlines()
 
-
-def plot_temperatures():
+def plot_vorticity():
+    figNum = 2
     data_graphable = np.flipud(np.rot90(omega))
 
-    figNum += 1
+    plt.figure(figNum)
+    plt.axes().set_aspect('equal')
+    plt.style.use('classic')
+
+    heatmap = plt.pcolor(data_graphable)
+
+    plt.axis("off")
+
+    plt.xlim(0, width)
+    plt.ylim(0, height)
+
+    cbar = plt.colorbar(heatmap)
+    cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
+    plt.clim(np.amin(data_graphable), np.amax(data_graphable))
+
+    plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+    plt.show()
+plot_vorticity()
+
+def plot_temperatures():
+    figNum = 3
+    data_graphable = np.flipud(np.rot90(temp))
+
     plt.figure(figNum)
     plt.axes().set_aspect('equal')
     plt.style.use('classic')
