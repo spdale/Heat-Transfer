@@ -39,7 +39,6 @@ h = min(h_1, h_2)       # grid spacing
 dt = (h / U_inf) / 2
 
 
-# Create array and initialize to T-initial
 omega = np.zeros((width, height))           # vorticity
 psi = np.zeros((width, height))             # streamfunction
 temp = np.zeros((width, height)) + T_init   # temperature
@@ -95,7 +94,7 @@ def is_outflow_boundary(x, y):
         return True
     return False
 
-def gauss_seidel_iteration(data, omega = "", initial = False):
+def gauss_seidel_iteration(data, error_limit, omega = "", initial = False):
     """ 
     Perform Gauss-Seidel Iteration 
 
@@ -143,7 +142,7 @@ for i in range(width):
         if not is_boundary_condition(i, j):
             psi[i, j] = U_inf * j - free_lid
 
-        if solid_boundary(i, j):
+        if in_circle(i, j):
             temp[i, j] = T_surface
 
     psi[i, cylinder_center[1]] = 0 
@@ -153,7 +152,7 @@ for i in range(width):
     omega[i, 0] = T_boundary
     omega[i, (height - 1)] = T_boundary
 
-psi = gauss_seidel_iteration(psi, initial = True)
+psi = gauss_seidel_iteration(psi, error_limit, initial = True)
 
 
 
@@ -193,7 +192,7 @@ for n in range(1, num_time_steps):
                 omega[i, j] = omega[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
 
 
-                psi = gauss_seidel_iteration(psi, omega)
+                psi = gauss_seidel_iteration(psi, error_limit, omega)
 
 
                 u_delta_T = 0
@@ -234,7 +233,6 @@ def print_data_in_console():
     """ Print the data in the console (readable format) """
     print(np.rot90(psi))
 # print_data_in_console()
-
 
 def plot_streamlines():
     figNum = 1
