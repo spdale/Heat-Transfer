@@ -90,6 +90,12 @@ def solid_boundary(x, y, checked = False):
                 return (x, y + 1)
     return False
 
+def is_outflow_boundary(x, y):
+    """ Determine if (x,y) is at outflow boundary. """
+    if (x == (width - 1)) and (y != 0) and (y != (height - 1)):
+        return True
+    return False
+
 def set_initial_conditions():
     for i in range(width):
         for j in range(height):
@@ -145,6 +151,7 @@ def gauss_seidel_iteration(data, datatype, omega = ""):
                             error_flag = True
                             large_error_term_found = True
     return data
+
 psi = gauss_seidel_iteration(psi, "psi")
 
 
@@ -152,12 +159,6 @@ psi = gauss_seidel_iteration(psi, "psi")
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
-def is_outflow_boundary(x, y):
-    """ Determine if (x,y) is at outflow boundary. """
-    if (x == (width - 1)) and (y != 0) and (y != (height - 1)):
-        return True
-    return False
-
 u = np.zeros((width, height))
 v = np.zeros((width, height))
 
@@ -223,7 +224,6 @@ for n in range(1, num_time_steps):
 
 
 
-
 ###############################################################
 #  Graphs and Plots
 ###############################################################
@@ -231,16 +231,17 @@ for n in range(1, num_time_steps):
 figNum = 0
 
 def print_data_in_console():
-    # Print the data in the console (readable format)
+    """ Print the data in the console (readable format) """
     print(np.rot90(psi))
 # print_data_in_console()
 
 
 def plot_streamlines():
+    data_graphable = np.flipud(np.rot90(psi))
+
     figNum += 1
     fig = plt.figure(figNum)
     plt.axes().set_aspect('equal')
-    data_graphable = np.flipud(np.rot90(psi))
 
 
     num_streamlines = 31
@@ -268,11 +269,13 @@ def plot_streamlines():
 
 
 def plot_temperatures():
+    data_graphable = np.flipud(np.rot90(omega))
+
     figNum += 1
     plt.figure(figNum)
     plt.axes().set_aspect('equal')
     plt.style.use('classic')
-    data_graphable = np.flipud(np.rot90(omega))
+
     heatmap = plt.pcolor(data_graphable)
 
     plt.axis("off")
