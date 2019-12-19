@@ -8,7 +8,6 @@ height = 200
 width = 500
 
 num_time_steps = 10
-T_init = 50             # Initial constant temperature field in bulk fluid
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -16,9 +15,15 @@ cylinder_center = [(height / 2), 100]
 
 error_limit = 0.01      # 1% maximum change for convergence
 
-U_inf = 2                       # m/s uniform inflow
-F = 1.9                         # over-relaxation factor
-free_lid = U_inf * (height / 2) # free-lid streamfunction constant
+U_inf = 2                           # m/s uniform inflow
+F = 1.9                             # over-relaxation factor
+free_lid = U_inf * (height / 2)     # free-lid streamfunction constant
+
+Re_D = 200                          # Given Reynolds number
+
+T_surface = 400                     # K
+T_boundary = 300                    # K
+T_init = min(T_surface, T_boundary) # Bulk fluid initial temp
 
 # Constants picked for air around room temp
 rho = 3000              # kg/m^3
@@ -60,22 +65,50 @@ def is_boundary_condition(x, y):
         return True
     return False
 
+def solid_boundary(x, y, checked = False):
+    """ 
+    Determine if (x,y) is a point along the wall of a solid body.
+
+    @param checked: False if checking whether the point is a solid body.
+                    True if determining what the adjacent free (outside of solid body) point is. 
+    
+    @return: if checked = False: True if a wall point (adjacent to fluid) of body.
+             if checked = True: returns (x, y) values of the adjacent point in the fluid (i.e. outside of the solid body).
+    """
+    if not checked: 
+        if in_circle(x, y) and (not in_circle(x - 1, y) or not in_circle(x + 1, y) or not in_circle(x, y - 1) or not in_circle(x, y + 1)): 
+            return True
+    if checked: 
+        if in_circle(x, y):
+            if not in_circle(x - 1, y):
+                return (x - 1, y)
+            if not in_circle(x + 1, y):
+                return (x + 1, y)
+            if not in_circle(x, y - 1):
+                return (x, y - 1)
+            if not in_circle(x, y + 1):
+                return (x, y + 1)
+    return False
+
 def set_initial_conditions():
-    # Initial Conditions
     for i in range(width):
         for j in range(height):
             if in_circle(i, j):
                 psi[i, j] = 0
-    for i in range(width):
+                
+            # establish initial uniform gradient in psi
+            if not is_boundary_condition(i, j):
+                psi[i, j] = U_inf * j - free_lid
+
+            if solid_boundary(i, j):
+                temp[i, j] = T_surface
+
         psi[i, cylinder_center[1]] = 0 
         psi[i, 0] = -free_lid
         psi[i, (height - 1)] = free_lid
 
-    # establish initial uniform gradient in psi
-    for i in range(width):
-        for j in range(height):
-            if not is_boundary_condition(i, j):
-                psi[i, j] = U_inf * j - free_lid
+        omega[i, 0] = T_boundary
+        omega[i, (height - 1)] = T_boundary
 set_initial_conditions()
 
 def gauss_seidel_iteration(data, datatype, omega = ""):
@@ -119,31 +152,6 @@ psi = gauss_seidel_iteration(psi, "psi")
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
-def solid_boundary(x, y, checked = False):
-    """ 
-    Determine if (x,y) is a point along the wall of a solid body.
-
-    @param checked: False if checking whether the point is a solid body.
-                    True if determining what the adjacent free (outside of solid body) point is. 
-    
-    @return: if checked = False: True if a wall point (adjacent to fluid) of body.
-             if checked = True: returns (x, y) values of the adjacent point in the fluid (i.e. outside of the solid body).
-    """
-    if not checked: 
-        if in_circle(x, y) and not (in_circle(x - 1, y) or in_circle(x + 1, y) or in_circle(x, y - 1) or in_circle(x, y + 1)):
-            return True
-    if checked: 
-        if in_circle(x, y):
-            if not in_circle(x - 1, y):
-                return (x - 1, y)
-            if not in_circle(x + 1, y):
-                return (x + 1, y)
-            if not in_circle(x, y - 1):
-                return (x, y - 1)
-            if not in_circle(x, y + 1):
-                return (x, y + 1)
-    return False
-
 def is_outflow_boundary(x, y):
     """ Determine if (x,y) is at outflow boundary. """
     if (x == (width - 1)) and (y != 0) and (y != (height - 1)):
