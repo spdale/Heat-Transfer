@@ -1,7 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
-
 
 fileName = "Final-Project"
 
@@ -165,7 +163,7 @@ for i in range(width):
     omega[i, 0] = T_boundary
     omega[i, (height - 1)] = T_boundary
 
-psi = gauss_seidel_iteration(psi, error_limit, initial = True)
+# psi = gauss_seidel_iteration(psi, error_limit, initial = True)
 
 
 
@@ -238,27 +236,101 @@ temp_history = [temp.copy()]
 #     temp_history.append(temp.copy())
 
 
+
+###############################################################
+#  Graphs and Plots
+###############################################################
 def print_data_in_console():
     """ Print the data in the console (readable format) """
     print(np.rot90(psi))
 # print_data_in_console()
 
+def plot_streamlines():
+    data_graphable = np.flipud(np.rot90(psi))
 
-###############################################################
-#  Graphs and Plots
-###############################################################
+    fig = plt.figure(figNum)
+    plt.axes().set_aspect('equal')
+
+
+    num_streamlines = 31
+    max_streamline = np.max(data_graphable)
+    min_streamline = np.min(data_graphable)
+    contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
+    contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
+
+    plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
+
+
+    plt.xlim(0, width)
+    plt.ylim(0, height)
+    plt.xticks(np.arange(0, width + 1, 50))
+    plt.yticks(np.arange(0, height + 1, 20))
+    plt.tick_params(top=True, right=True)
+
+    plt.style.use('grayscale')
+    heatmap = plt.pcolor(data_graphable)
+    plt.clim(np.amin(data_graphable), np.amax(data_graphable))
+
+    plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+    plt.show()
+
+def plot_vorticity(fig, sub_num):
+    data_graphable = np.flipud(np.rot90(omega))
+
+    plt.figure(figNum)
+    plt.axes().set_aspect('equal')
+    plt.style.use('classic')
+
+    heatmap = plt.pcolor(data_graphable)
+
+    plt.axis("off")
+
+    plt.xlim(0, width)
+    plt.ylim(0, height)
+
+    cbar = plt.colorbar(heatmap)
+    cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
+    plt.clim(np.amin(data_graphable), np.amax(data_graphable))
+
+    plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+    plt.show()
+
+def plot_temperatures():
+    data_graphable = np.flipud(np.rot90(temp))
+
+    plt.figure(figNum)
+    plt.axes().set_aspect('equal')
+    plt.style.use('classic')
+
+    heatmap = plt.pcolor(data_graphable)
+
+    plt.axis("off")
+
+    plt.xlim(0, width)
+    plt.ylim(0, height)
+
+    cbar = plt.colorbar(heatmap)
+    cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
+    plt.clim(np.amin(data_graphable), np.amax(data_graphable))
+
+    plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+    plt.show()
+
+
 figNum = 1
-fig = plt.figure(figNum, figsize=(10, 10.5))
 
+# fig, (sub1, sub2, sub3) = plt.subplots(3, 1)
 
+fig = plt.figure(figNum)
+sub1 = fig.add_subplot(311)
+sub2 = fig.add_subplot(312)
+sub3 = fig.add_subplot(313)
 
-###############################################################
-#  Streamfunction Plot
-###############################################################
-sub1 = plt.subplot(3, 1, 1, aspect = 'equal')
+##### Steamfunction Plot #####
+# sub1 = plt.subplot(3, 1, 1, aspect = 'equal')
 data_graphable = np.flipud(np.rot90(psi))
 
-plt.title("Streamfunction")
+sub1.set_title("Streamfunction")
 
 num_streamlines = 31
 max_streamline = np.max(data_graphable)
@@ -266,64 +338,68 @@ min_streamline = np.min(data_graphable)
 contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
 contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
 
-plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
+sub1.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
 
 
 plt.style.use('grayscale')
-plt.xticks(np.arange(0, width + 1, 50))
-plt.yticks(np.arange(0, height + 1, 20))
-plt.tick_params(top=True, right=True)
+sub1.set_xticks(np.arange(0, width + 1, 50))
+sub1.set_yticks(np.arange(0, height + 1, 20))
+sub1.tick_params(top=True, right=True)
 
-plt.pcolor(data_graphable)
+# plt.axis("off")
 
-# Color bar: 
-divider1 = make_axes_locatable(sub1)
-cax1 = divider1.append_axes('right', size = '3%', pad = 0.3)
-im = sub1.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
-fig.colorbar(im, cax = cax1, orientation = 'vertical')
+sub1.pcolor(data_graphable)
+# plt.colorbar()
 
-
+# fig.colorbar(sub1.imshow(np.flipud(data_graphable)), ax = sub1)
+fig.colorbar(sub1.imshow(data_graphable, origin='lower', interpolation='none', aspect = 'auto'), ax = sub1)
 
 
-###############################################################
-#  Vorticity Plot
-###############################################################
-sub2 = plt.subplot(3, 1, 2, aspect = 'equal')
+
+
+##### Vorticity Plot #####
+# sub2 = plt.subplot(3, 1, 2, aspect = 'equal')
 data_graphable = np.flipud(np.rot90(omega))
 
-plt.title("Vorticity")
+sub2.set_title("Vorticity")
+
+# plt.style.use('grayscale')
+# plt.xticks(np.arange(0, width + 1, 50))
+# plt.yticks(np.arange(0, height + 1, 20))
+# plt.tick_params(top=True, right=True)
 plt.axis("off")
 
-plt.pcolor(data_graphable)
-
-# Color bar: 
-divider2 = make_axes_locatable(sub2)
-cax2 = divider2.append_axes('right', size = '3%', pad = 0.3)
-im = sub2.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
-fig.colorbar(im, cax = cax2, orientation = 'vertical')
+sub2.pcolor(data_graphable)
+# sub2.colorbar()
+# fig.colorbar(sub2.imshow(data_graphable, interpolation = 'none'), ax = sub2)
+fig.colorbar(sub2.imshow(data_graphable, origin='lower', interpolation='none', aspect = 'auto'), ax = sub2)
 
 
 
-
-###############################################################
-#  Temperature Plot
-###############################################################
-sub3 = fig.add_subplot(3, 1, 3, aspect = 'equal')
+##### Temperature Plot #####
+# sub3 = plt.subplot(3, 1, 3, aspect = 'equal')
 data_graphable = np.flipud(np.rot90(temp))
-plt.title("Temperature")
+
+sub3.set_title("Temperature")
+
 
 plt.style.use('classic')
+# plt.xticks(np.arange(0, width + 1, 50))
+# plt.yticks(np.arange(0, height + 1, 20))
+# plt.tick_params(top=True, right=True)
 plt.axis("off")
+sub3.pcolor(data_graphable)
+fig.colorbar(sub3.imshow(data_graphable, origin='lower', interpolation='none', aspect = 'auto'),ax = sub3)
 
-# Color bar: 
-divider3 = make_axes_locatable(sub3)
-cax3 = divider3.append_axes('right', size = '3%', pad = 0.3)
-im = sub3.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
-cbar = fig.colorbar(im, cax=cax3, orientation = 'vertical')
-cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
+# fig.colorbar(data_graphable, ax = sub3)
+# fig.colorbar(sub3.imshow(data_graphable), ax = sub3)
 
 
+
+
+# plt.axes().set_aspect('equal')
 
 
 plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
 plt.show()
+
