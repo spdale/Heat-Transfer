@@ -319,8 +319,8 @@ def plot_temperatures():
 
 figNum = 1
 
-### Steamfunction Plot
-plt.subplot(3, 1, 1, aspect = 'equal')
+##### Steamfunction Plot #####
+sub1 = plt.subplot(3, 1, 1, aspect = 'equal')
 data_graphable = np.flipud(np.rot90(psi))
 
 plt.title("Streamfunction")
@@ -341,12 +341,13 @@ plt.tick_params(top=True, right=True)
 # plt.axis("off")
 
 plt.pcolor(data_graphable)
+# plt.colorbar()
 
 
 
 
-### Vorticity Plot 
-plt.subplot(3, 1, 2, aspect = 'equal')
+##### Vorticity Plot #####
+sub2 = plt.subplot(3, 1, 2, aspect = 'equal')
 data_graphable = np.flipud(np.rot90(omega))
 
 plt.title("Vorticity")
@@ -358,11 +359,13 @@ plt.title("Vorticity")
 plt.axis("off")
 
 plt.pcolor(data_graphable)
+# plt.colorbar()
 
 
 
-### Temperatures
-plt.subplot(3, 1, 3, aspect = 'equal')
+
+##### Temperature Plot #####
+sub3 = plt.subplot(3, 1, 3, aspect = 'equal')
 data_graphable = np.flipud(np.rot90(temp))
 
 plt.title("Temperature")
@@ -374,12 +377,11 @@ plt.style.use('classic')
 # plt.tick_params(top=True, right=True)
 plt.axis("off")
 
-heatmap = plt.pcolor(data_graphable)
+plt.pcolor(data_graphable)
 
-# cbar = plt.colorbar(heatmap)
+# cbar = plt.colorbar()
 # cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
 # plt.clim(np.amin(data_graphable), np.amax(data_graphable))
-
 
 
 
