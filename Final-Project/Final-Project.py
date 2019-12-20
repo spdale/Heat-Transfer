@@ -27,7 +27,7 @@ T_init = min(T_surface, T_boundary) # Bulk fluid initial temp
 # Constants picked for air around room temp
 rho = 3000              # kg/m^3
 c = 840                 # J/(kg*C)
-h = 28                  # W/(m^2*C)  Convective Heat Transfer Coefficient
+#h = 28                  # W/(m^2*C)  Convective Heat Transfer Coefficient
 k = 5.2                 # W/(m*C)    Thermal Conductivity
 alpha = k / (rho * c)   # m^2/s      Thermal Diffusivity
 nu = 1.48 * 10**(-5)    # m^s/s      kinematic viscosity
@@ -163,39 +163,10 @@ for i in range(width):
     omega[i, 0] = T_boundary
     omega[i, (height - 1)] = T_boundary
 
-psi = gauss_seidel_iteration(psi, error_limit, initial = True)
+# psi = gauss_seidel_iteration(psi, error_limit, initial = True)
 
 
-def plot_streamlines():
-    figNum = 1
-    data_graphable = np.flipud(np.rot90(psi))
 
-    fig = plt.figure(figNum)
-    plt.axes().set_aspect('equal')
-
-
-    num_streamlines = 31
-    max_streamline = np.max(data_graphable)
-    min_streamline = np.min(data_graphable)
-    contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
-    contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
-
-    plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
-
-
-    plt.xlim(0, width)
-    plt.ylim(0, height)
-    plt.xticks(np.arange(0, width + 1, 50))
-    plt.yticks(np.arange(0, height + 1, 20))
-    plt.tick_params(top=True, right=True)
-
-    plt.style.use('grayscale')
-    heatmap = plt.pcolor(data_graphable)
-    plt.clim(np.amin(data_graphable), np.amax(data_graphable))
-
-    plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
-    plt.show()
-plot_streamlines()
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
@@ -302,9 +273,8 @@ def plot_streamlines():
 
     plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
     plt.show()
-plot_streamlines()
 
-def plot_vorticity(fig):
+def plot_vorticity(fig, sub_num):
     data_graphable = np.flipud(np.rot90(omega))
 
     plt.figure(figNum)
@@ -347,7 +317,75 @@ def plot_temperatures():
     plt.show()
 
 
-
 figNum = 1
-fig = plt.figure(figNum)
+
+### Steamfunction Plot
+plt.subplot(3, 1, 1, aspect = 'equal')
+data_graphable = np.flipud(np.rot90(psi))
+
+plt.title("Streamfunction")
+
+num_streamlines = 31
+max_streamline = np.max(data_graphable)
+min_streamline = np.min(data_graphable)
+contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
+contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
+
+plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
+
+
+plt.style.use('grayscale')
+plt.xticks(np.arange(0, width + 1, 50))
+plt.yticks(np.arange(0, height + 1, 20))
+plt.tick_params(top=True, right=True)
+# plt.axis("off")
+
+plt.pcolor(data_graphable)
+
+
+
+
+### Vorticity Plot 
+plt.subplot(3, 1, 2, aspect = 'equal')
+data_graphable = np.flipud(np.rot90(omega))
+
+plt.title("Vorticity")
+
+# plt.style.use('classic')
+# plt.xticks(np.arange(0, width + 1, 50))
+# plt.yticks(np.arange(0, height + 1, 20))
+# plt.tick_params(top=True, right=True)
+plt.axis("off")
+
+plt.pcolor(data_graphable)
+
+
+
+### Temperatures
+plt.subplot(3, 1, 3, aspect = 'equal')
+data_graphable = np.flipud(np.rot90(temp))
+
+plt.title("Temperature")
+
+
+plt.style.use('classic')
+# plt.xticks(np.arange(0, width + 1, 50))
+# plt.yticks(np.arange(0, height + 1, 20))
+# plt.tick_params(top=True, right=True)
+plt.axis("off")
+
+heatmap = plt.pcolor(data_graphable)
+
+# cbar = plt.colorbar(heatmap)
+# cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
+# plt.clim(np.amin(data_graphable), np.amax(data_graphable))
+
+
+
+
+
+
+
+plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+plt.show()
 
