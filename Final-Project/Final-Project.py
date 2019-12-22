@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
+import cv2
+import os
+
 
 fileName = "Final-Project"
 
@@ -247,83 +250,108 @@ def print_data_in_console():
 ###############################################################
 #  Graphs and Plots
 ###############################################################
-figNum = 1
-fig = plt.figure(figNum, figsize=(10, 10.5))
+for plot_index in range(num_time_steps):
+    figNum = plot_index
+    fig = plt.figure(figNum, figsize=(10, 10.5))
+
+
+
+    ###############################################################
+    #  Streamfunction Plot
+    ###############################################################
+    sub1 = plt.subplot(3, 1, 1, aspect = 'equal')
+    data_graphable = np.flipud(np.rot90(psi_history[plot_index]))
+
+    plt.title("Streamfunction")
+
+    num_streamlines = 31
+    max_streamline = np.max(data_graphable)
+    min_streamline = np.min(data_graphable)
+    contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
+    contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
+
+    plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
+
+
+    plt.style.use('grayscale')
+    plt.xticks(np.arange(0, width + 1, 50))
+    plt.yticks(np.arange(0, height + 1, 20))
+    plt.tick_params(top=True, right=True)
+
+    plt.pcolor(data_graphable)
+
+    # Color bar: 
+    divider1 = make_axes_locatable(sub1)
+    cax1 = divider1.append_axes('right', size = '3%', pad = 0.3)
+    im = sub1.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
+    fig.colorbar(im, cax = cax1, orientation = 'vertical')
+
+
+
+
+    ###############################################################
+    #  Vorticity Plot
+    ###############################################################
+    sub2 = plt.subplot(3, 1, 2, aspect = 'equal')
+    data_graphable = np.flipud(np.rot90(omega_history[plot_index]))
+
+    plt.title("Vorticity")
+    plt.axis("off")
+
+    plt.pcolor(data_graphable)
+
+    # Color bar: 
+    divider2 = make_axes_locatable(sub2)
+    cax2 = divider2.append_axes('right', size = '3%', pad = 0.3)
+    im = sub2.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
+    fig.colorbar(im, cax = cax2, orientation = 'vertical')
+
+
+
+
+    ###############################################################
+    #  Temperature Plot
+    ###############################################################
+    sub3 = fig.add_subplot(3, 1, 3, aspect = 'equal')
+    data_graphable = np.flipud(np.rot90(temp_history[plot_index]))
+    plt.title("Temperature")
+
+    plt.style.use('classic')
+    plt.axis("off")
+
+    # Color bar: 
+    divider3 = make_axes_locatable(sub3)
+    cax3 = divider3.append_axes('right', size = '3%', pad = 0.3)
+    im = sub3.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
+    cbar = fig.colorbar(im, cax=cax3, orientation = 'vertical')
+    cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
+
+
+
+
+    plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
+    # plt.show()
+
 
 
 
 ###############################################################
-#  Streamfunction Plot
+#  Generate Video
 ###############################################################
-sub1 = plt.subplot(3, 1, 1, aspect = 'equal')
-data_graphable = np.flipud(np.rot90(psi))
+image_folder = "C:\\Users\\samda\\Documents\\GitHub\\Heat-Transfer\\Final-Project\\images"
+output_folder = "C:\\Users\\samda\\Documents\\GitHub\\Heat-Transfer\\Final-Project\\"
+video_name = output_folder + "final-project.mp4"
+fps = 5
 
-plt.title("Streamfunction")
+images = [img for img in os.listdir(image_folder) if img.endswith(".png")]
+frame = cv2.imread(os.path.join(image_folder, images[0]))
+height, width, layers = frame.shape
 
-num_streamlines = 31
-max_streamline = np.max(data_graphable)
-min_streamline = np.min(data_graphable)
-contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
-contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+video = cv2.VideoWriter(video_name, fourcc, fps, (width, height))
 
-plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
+for image in images:
+    video.write(cv2.imread(os.path.join(image_folder, image)))
 
-
-plt.style.use('grayscale')
-plt.xticks(np.arange(0, width + 1, 50))
-plt.yticks(np.arange(0, height + 1, 20))
-plt.tick_params(top=True, right=True)
-
-plt.pcolor(data_graphable)
-
-# Color bar: 
-divider1 = make_axes_locatable(sub1)
-cax1 = divider1.append_axes('right', size = '3%', pad = 0.3)
-im = sub1.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
-fig.colorbar(im, cax = cax1, orientation = 'vertical')
-
-
-
-
-###############################################################
-#  Vorticity Plot
-###############################################################
-sub2 = plt.subplot(3, 1, 2, aspect = 'equal')
-data_graphable = np.flipud(np.rot90(omega))
-
-plt.title("Vorticity")
-plt.axis("off")
-
-plt.pcolor(data_graphable)
-
-# Color bar: 
-divider2 = make_axes_locatable(sub2)
-cax2 = divider2.append_axes('right', size = '3%', pad = 0.3)
-im = sub2.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
-fig.colorbar(im, cax = cax2, orientation = 'vertical')
-
-
-
-
-###############################################################
-#  Temperature Plot
-###############################################################
-sub3 = fig.add_subplot(3, 1, 3, aspect = 'equal')
-data_graphable = np.flipud(np.rot90(temp))
-plt.title("Temperature")
-
-plt.style.use('classic')
-plt.axis("off")
-
-# Color bar: 
-divider3 = make_axes_locatable(sub3)
-cax3 = divider3.append_axes('right', size = '3%', pad = 0.3)
-im = sub3.imshow(data_graphable, origin = 'lower', aspect = 'equal', interpolation = 'none')
-cbar = fig.colorbar(im, cax=cax3, orientation = 'vertical')
-cbar.set_label("Temperature (\N{DEGREE SIGN}C)")
-
-
-
-
-plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
-plt.show()
+cv2.destroyAllWindows()
+video.release()

@@ -39,6 +39,14 @@ Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as th
 </p>
 
 ---
+## Python Package Installs
+(In Command Prompt or Terminal)
+
+- numpy: ```pip install numpy```
+- cv2: ```pip install opencv-python```
+- matplotlib: ```pip install matplotlib```
+
+---
 ## Software Setup
 Setup Python Code: 
 - [Virtual Studio Code][3]
