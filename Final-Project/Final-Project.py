@@ -11,7 +11,7 @@ fileName = "Final-Project"
 height = 200
 width = 500
 
-num_time_steps = 1
+num_time_steps = 10
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -183,62 +183,62 @@ psi_history = [psi.copy()]
 temp_history = [temp.copy()]
 
 
-# for n in range(1, num_time_steps):
-#     for i in range(width):
-#         for j in range(height):
-#             if not is_boundary_condition(i, j):
-#                 # Bulk Fluid
-#                 u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
-#                 v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
+for n in range(1, num_time_steps):
+    for i in range(width):
+        for j in range(height):
+            if not is_boundary_condition(i, j):
+                # Bulk Fluid
+                u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
+                v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
 
-#                 delta_u_omega = 0
-#                 if (u[i, j] < 0):
-#                     delta_u_omega = u[i + 1, j] * omega[i + 1, j] - u[i, j] * omega[i, j]
-#                 elif (u[i, j] > 0):
-#                     delta_u_omega = u[i, j] * omega[i, j] - u[i - 1, j]
+                delta_u_omega = 0
+                if (u[i, j] < 0):
+                    delta_u_omega = u[i + 1, j] * omega[i + 1, j] - u[i, j] * omega[i, j]
+                elif (u[i, j] > 0):
+                    delta_u_omega = u[i, j] * omega[i, j] - u[i - 1, j]
                     
-#                 delta_v_omega = 0
-#                 if (v[i, j] < 0):
-#                     delta_v_omega = v[i, j + 1] * omega[i, j + 1] - v[i, j] * omega[i, j]
-#                 elif (v[i, j] > 0):
-#                     delta_v_omega = v[i, j] * omega[i, j] - v[i, j - 1] * omega[i, j - 1]
+                delta_v_omega = 0
+                if (v[i, j] < 0):
+                    delta_v_omega = v[i, j + 1] * omega[i, j + 1] - v[i, j] * omega[i, j]
+                elif (v[i, j] > 0):
+                    delta_v_omega = v[i, j] * omega[i, j] - v[i, j - 1] * omega[i, j - 1]
 
-#                 vorticity_laplacian = (omega[i + 1, j] + omega[i - 1, j] + omega[i, j + 1] + omega[i, j - 1] - 4 * omega[i, j]) / (h ** 2)
+                vorticity_laplacian = (omega[i + 1, j] + omega[i - 1, j] + omega[i, j + 1] + omega[i, j - 1] - 4 * omega[i, j]) / (h ** 2)
 
-#                 omega[i, j] = omega[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
-
-
-#                 psi = gauss_seidel_iteration(psi, error_limit, omega)
+                omega[i, j] = omega[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
 
 
-#                 u_delta_T = 0
-#                 if (u[i, j] < 0):
-#                     u_delta_T = u[i, j] * (temp[i + 1, j] - temp[i, j])
-#                 elif (u[i, j] < 0): 
-#                     u_delta_T = u[i, j] * (temp[i, j] - temp[i - 1, j])
+                psi = gauss_seidel_iteration(psi, error_limit, omega)
 
-#                 v_delta_T = 0
-#                 if (v[i, j] < 0):
-#                     v_delta_T = v[i, j] * (temp[i, j + 1] - temp[i, j])
-#                 elif (v[i, j] > 0):
-#                     v_delta_T = v[i, j] * (temp[i, j] - temp[i, j - 1])
+
+                u_delta_T = 0
+                if (u[i, j] < 0):
+                    u_delta_T = u[i, j] * (temp[i + 1, j] - temp[i, j])
+                elif (u[i, j] < 0): 
+                    u_delta_T = u[i, j] * (temp[i, j] - temp[i - 1, j])
+
+                v_delta_T = 0
+                if (v[i, j] < 0):
+                    v_delta_T = v[i, j] * (temp[i, j + 1] - temp[i, j])
+                elif (v[i, j] > 0):
+                    v_delta_T = v[i, j] * (temp[i, j] - temp[i, j - 1])
                 
-#                 temp_laplacian = (temp[i + 1, j] + temp[i - 1, j] + temp[i, j + 1] + temp[i, j - 1] - 4 * temp[i, j]) / (h ** 2)
+                temp_laplacian = (temp[i + 1, j] + temp[i - 1, j] + temp[i, j + 1] + temp[i, j - 1] - 4 * temp[i, j]) / (h ** 2)
 
-#                 temp[i, j] = temp[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * temp_laplacian)
+                temp[i, j] = temp[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * temp_laplacian)
 
-#             if solid_boundary(i, j, checked = False):
-#                 (adj_ext_pt_x, adj_ext_pt_y) = solid_boundary(i, j, checked = True)
-#                 omega[i, j] = -2 * (psi[adj_ext_pt_x, adj_ext_pt_y] - psi[i, j]) / (h ** 2)
+            if solid_boundary(i, j, checked = False):
+                (adj_ext_pt_x, adj_ext_pt_y) = solid_boundary(i, j, checked = True)
+                omega[i, j] = -2 * (psi[adj_ext_pt_x, adj_ext_pt_y] - psi[i, j]) / (h ** 2)
 
-#             if is_outflow_boundary(i, j):
-#                 psi[i, j] = 2 * psi[i - 1, j] - psi[i - 2, j]
-#                 omega[i, j] = omega[i - 1, j]
+            if is_outflow_boundary(i, j):
+                psi[i, j] = 2 * psi[i - 1, j] - psi[i - 2, j]
+                omega[i, j] = omega[i - 1, j]
             
 
-#     omega_history.append(omega.copy())
-#     psi_history.append(psi.copy())
-#     temp_history.append(temp.copy())
+    omega_history.append(omega.copy())
+    psi_history.append(psi.copy())
+    temp_history.append(temp.copy())
 
 
 def print_data_in_console():
