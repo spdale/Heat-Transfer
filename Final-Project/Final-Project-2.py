@@ -9,20 +9,12 @@ import time
 start_time = time.time()
 
 
-
-CURRENT = slice(1, -1), slice(1, -1)
-LEFT    = slice(0, -2), slice(1, -1)
-RIGHT   = slice(2, None),    slice(1, -1)
-DOWN    = slice(1, -1), slice(0, -2)
-UP      = slice(1, -1), slice(2, None)
-
-
 fileName = "Final-Project"
 
 height = 200
 width = 500
 
-num_time_steps = 10
+num_time_steps = 2
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -126,23 +118,23 @@ def solid_body_setup(width, height):
                 solid_cols.append(j)
 solid_body_setup(width, height)
 
-def test_solid_setup():
-    solid_body_test = np.zeros((width, height))
-    solid_body_test[solid_rows, solid_cols] = 1
+def test_setup():
+    solid_body3 = np.zeros((width, height))
+    solid_body3[solid_rows, solid_cols] = 1
 
 
     figNum = 1
     fig = plt.figure(figNum)
     plt.axes().set_aspect('equal')
-    data_graphable = np.flipud(np.rot90(solid_body_test))
+    data_graphable = np.flipud(np.rot90(solid_body3))
 
     plt.pcolor(data_graphable)
 
     plt.show()
-# test_solid_setup()
+# test_setup()
 
 
-def gauss_seidel_iteration(data, initial = False):
+def gauss_seidel_iteration(data, error_limit, omega = "", initial = False):
     """ 
     Perform Gauss-Seidel Iteration 
 
@@ -157,21 +149,20 @@ def gauss_seidel_iteration(data, initial = False):
         data_old = data.copy()
 
         # data[i, j] = data[i, j] + (F / 4) * (data[i + 1, j] + data[i - 1, j] + data[i, j + 1] + data[i, j - 1] - 4 * data[i, j])
-        # data[1:-1, 1:-1] = data[1:-1, 1:-1] + (1 / 4) * (data[0:-2, 1:-1] + data[2:, 1:-1] + data[1:-1,0:-2] + data[1:-1, 2:] - 4 * data[1:-1, 1:-1])
 
-        data[CURRENT] = data[CURRENT] + (1 / 4) * (data[LEFT] + data[RIGHT] + data[DOWN] + data[UP] - 4 * data[CURRENT])
+        data[1:-1, 1:-1] = data[1:-1, 1:-1] + (1 / 4) * (data[0:-2, 1:-1] + data[2:, 1:-1] + data[1:-1,0:-2] + data[1:-1, 2:] - 4 * data[1:-1, 1:-1])
         if not initial:
             data += h * h * omega   # Multiply by F
 
-        data[0, :] = data[3, :]
+        data[0, :] = data[3,:]
         data[width - 1, :] = data[width - 2, :]
 
         
         data[solid_rows, solid_cols] = 0
 
 
-        temp_array = np.absolute(data - data_old)
-        error_array = np.divide(temp_array, data_old, out = np.zeros_like(data), where = ((temp_array != 0) & (data_old != 0)))
+        temp = np.absolute(data - data_old)
+        error_array = np.divide(temp, data_old, out = np.zeros_like(data), where = ((temp != 0) & (data_old != 0)))
         error_array[error_array == np.inf] = 0
         error_term = np.amax(error_array)
 
@@ -200,40 +191,10 @@ for i in range(width):
         if not is_boundary_condition(i, j):
             psi[i, j] = U_inf * j - free_lid
 
-psi = gauss_seidel_iteration(psi, initial = True)
-
-print("--- Initial Psi Setup ---")
-print("--- %.7f seconds ---" % (time.time() - start_time))
+psi = gauss_seidel_iteration(psi, error_limit, initial = True)
 
 
-def test_initial_setup():
-    figNum = 2
-    fig = plt.figure(figNum)
-    plt.axes().set_aspect('equal')
-    data_graphable = np.flipud(np.rot90(psi))
-
-
-    num_streamlines = 31
-    max_streamline = np.max(data_graphable)
-    min_streamline = np.min(data_graphable)
-    contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
-    contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
-
-    plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
-
-
-    plt.xlim(0, width)
-    plt.ylim(0, height)
-    plt.xticks(np.arange(0, width + 1, 50))
-    plt.yticks(np.arange(0, height + 1, 20))
-    plt.tick_params(top=True, right=True)
-
-    plt.style.use('grayscale')
-    heatmap = plt.pcolor(data_graphable)
-    plt.clim(np.amin(data_graphable), np.amax(data_graphable))
-
-    plt.show()
-# test_initial_setup()
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
@@ -258,125 +219,66 @@ temp_history = [temp.copy()]
 # data[1:-1, 0:-2]  down
 # data[1:-1, 2:  ]    up
 
-# CURRENT = slice(1, -1), slice(1, -1)
-# LEFT    = slice(0, -2), slice(1, -1)
-# RIGHT   = slice(2,),    slice(1, -1)
-# UP      = slice(1, -1), slice(0, -2)
-# DOWN    = slice(1, -1), slice(1,)
-
 delta_u_omega = np.zeros((width, height))
 delta_v_omega = np.zeros((width, height))
-vorticity_laplacian = np.zeros((width, height))
 
 for n in range(1, num_time_steps):
-    # u[CURRENT] = (psi[1:-1, 2:  ] - psi[1:-1,0:-2]) / (2 * h)
-    # v[CURRENT] = (psi[0:-2, 1:-1] - psi[2:,  1:-1]) / (2 * h)
-    u[CURRENT] = (psi[UP] - psi[DOWN]) / (2 * h)
-    v[CURRENT] = (psi[LEFT] - psi[RIGHT]) / (2 * h)
+    u[1:-1, 1:-1] = (psi[1:-1, 2:  ] - psi[1:-1,0:-2]) / (2 * h)
+    v[1:-1, 1:-1] = (psi[0:-2, 1:-1] - psi[2:,  1:-1]) / (2 * h)
 
-    delta_u_omega.fill(0)
-    delta_v_omega.fill(0)
+    delta_u_omega = 0
+    delta_v_omega = 0
 
-    # delta_u_omega = [u[RIGHT] * omega[RIGHT] - u[CURRENT] * omega[CURRENT] if u[CURRENT] < 0]
-    # error_array[error_array == np.inf] = 0
-    
-    u_neg_ind = np.nonzero(u < 0)
-    u_pos_ind = np.nonzero(u > 0)
-    v_neg_ind = np.nonzero(v < 0)
-    v_pos_ind = np.nonzero(v > 0)
+    delta_u_omega[1:-1, 1:-1] = u[2:,   1:-1] * omega[2:,   1:-1] - u[1:-1, 1:-1] * omega[1:-1, 1:-1]
+    delta_u_omega[1:-1, 1:-1] = u[1:-1, 1:-1] * omega[1:-1, 1:-1] - u[] * omega[]
 
-    u_neg_ind_right = u_neg_ind[:]
-    u_neg_ind_right[:][1][:] += 1
-
-    u_pos_ind_left = u_pos_ind[:]
-    u_pos_ind_left[:][1][:] += -1
-
-
-    v_neg_ind_up = v_neg_ind[:]
-    v_neg_ind_up[:][0][:] += 1
-
-    v_pos_ind_down = v_pos_ind[:]
-    v_pos_ind_down[:][0][:] += -1
-
-
-
-
-    delta_u_omega[u_neg_ind] = u[u_neg_ind_right] * omega[u_neg_ind_right] - u[u_neg_ind] * omega[u_neg_ind]
-    delta_u_omega[u_pos_ind] = u[u_pos_ind] * omega[u_pos_ind] - u[u_pos_ind_left] * omega[u_pos_ind_left]
-    
-    delta_v_omega[v_neg_ind] = v[v_neg_ind_up] * omega[v_neg_ind_up] - v[v_neg_ind] * omega[v_neg_ind]
-    delta_v_omega[v_pos_ind] = v[v_pos_ind] * omega[v_pos_ind] - v[v_pos_ind_down] * omega[v_pos_ind_down]
-
-    vorticity_laplacian[CURRENT] = (omega[UP] + omega[DOWN] + omega[LEFT] + omega[RIGHT] - 4 * omega[CURRENT]) / (h * h)
-
-    # print("omega")
-    # print(omega.shape)
-    # print("delta_u_omega")
-    # print(delta_u_omega.shape)
-    # print("delta_v_omega")
-    # print(delta_v_omega.shape)
-    # print("vorticity_laplacian")
-    # print(vorticity_laplacian.shape)
-    # omega += dt * (-delta_u_omega - delta_v_omega) / h + nu * vorticity_laplacian
-
-
-    psi = gauss_seidel_iteration(psi)
-
-    if ((n + 1) % 10 == 0):
-        print("Time Step: " + str(n + 1) + " of " + str(num_time_steps))
-
-    #### Still need temperature stuff and solid_boundary and outflow boundary
-
-
-
-
-    # for i in range(width):
-    #     for j in range(height):
-    #         if not is_boundary_condition(i, j):
-    #             # Bulk Fluid
-    #             delta_u_omega = 0
-    #             if (u[i, j] < 0):
-    #                 delta_u_omega = u[i + 1, j] * omega[i + 1, j] - u[i, j] * omega[i, j]
-    #             elif (u[i, j] > 0):
-    #                 delta_u_omega = u[i, j] * omega[i, j] - u[i - 1, j]
+    for i in range(width):
+        for j in range(height):
+            if not is_boundary_condition(i, j):
+                # Bulk Fluid
+                delta_u_omega = 0
+                if (u[i, j] < 0):
+                    delta_u_omega = u[i + 1, j] * omega[i + 1, j] - u[i, j] * omega[i, j]
+                elif (u[i, j] > 0):
+                    delta_u_omega = u[i, j] * omega[i, j] - u[i - 1, j] * omega[i - 1, j]
                     
-    #             delta_v_omega = 0
-    #             if (v[i, j] < 0):
-    #                 delta_v_omega = v[i, j + 1] * omega[i, j + 1] - v[i, j] * omega[i, j]
-    #             elif (v[i, j] > 0):
-    #                 delta_v_omega = v[i, j] * omega[i, j] - v[i, j - 1] * omega[i, j - 1]
+                delta_v_omega = 0
+                if (v[i, j] < 0):
+                    delta_v_omega = v[i, j + 1] * omega[i, j + 1] - v[i, j] * omega[i, j]
+                elif (v[i, j] > 0):
+                    delta_v_omega = v[i, j] * omega[i, j] - v[i, j - 1] * omega[i, j - 1]
 
-    #             vorticity_laplacian = (omega[i + 1, j] + omega[i - 1, j] + omega[i, j + 1] + omega[i, j - 1] - 4 * omega[i, j]) / (h ** 2)
+                vorticity_laplacian = (omega[i + 1, j] + omega[i - 1, j] + omega[i, j + 1] + omega[i, j - 1] - 4 * omega[i, j]) / (h ** 2)
 
-    #             omega[i, j] = omega[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
-
-
-    #             psi = gauss_seidel_iteration(psi, error_limit, omega)
+                omega[i, j] = omega[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
 
 
-    #             u_delta_T = 0
-    #             if (u[i, j] < 0):
-    #                 u_delta_T = u[i, j] * (temp[i + 1, j] - temp[i, j])
-    #             elif (u[i, j] < 0): 
-    #                 u_delta_T = u[i, j] * (temp[i, j] - temp[i - 1, j])
+                psi = gauss_seidel_iteration(psi, error_limit, omega)
 
-    #             v_delta_T = 0
-    #             if (v[i, j] < 0):
-    #                 v_delta_T = v[i, j] * (temp[i, j + 1] - temp[i, j])
-    #             elif (v[i, j] > 0):
-    #                 v_delta_T = v[i, j] * (temp[i, j] - temp[i, j - 1])
+
+                u_delta_T = 0
+                if (u[i, j] < 0):
+                    u_delta_T = u[i, j] * (temp[i + 1, j] - temp[i, j])
+                elif (u[i, j] < 0): 
+                    u_delta_T = u[i, j] * (temp[i, j] - temp[i - 1, j])
+
+                v_delta_T = 0
+                if (v[i, j] < 0):
+                    v_delta_T = v[i, j] * (temp[i, j + 1] - temp[i, j])
+                elif (v[i, j] > 0):
+                    v_delta_T = v[i, j] * (temp[i, j] - temp[i, j - 1])
                 
-    #             temp_laplacian = (temp[i + 1, j] + temp[i - 1, j] + temp[i, j + 1] + temp[i, j - 1] - 4 * temp[i, j]) / (h ** 2)
+                temp_laplacian = (temp[i + 1, j] + temp[i - 1, j] + temp[i, j + 1] + temp[i, j - 1] - 4 * temp[i, j]) / (h ** 2)
 
-    #             temp[i, j] = temp[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * temp_laplacian)
+                temp[i, j] = temp[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * temp_laplacian)
 
-    #         if solid_boundary(i, j, checked = False):
-    #             (adj_ext_pt_x, adj_ext_pt_y) = solid_boundary(i, j, checked = True)
-    #             omega[i, j] = -2 * (psi[adj_ext_pt_x, adj_ext_pt_y] - psi[i, j]) / (h ** 2)
+            if solid_boundary(i, j, checked = False):
+                (adj_ext_pt_x, adj_ext_pt_y) = solid_boundary(i, j, checked = True)
+                omega[i, j] = -2 * (psi[adj_ext_pt_x, adj_ext_pt_y] - psi[i, j]) / (h ** 2)
 
-    #         if is_outflow_boundary(i, j):
-    #             psi[i, j] = 2 * psi[i - 1, j] - psi[i - 2, j]
-    #             omega[i, j] = omega[i - 1, j]
+            if is_outflow_boundary(i, j):
+                psi[i, j] = 2 * psi[i - 1, j] - psi[i - 2, j]
+                omega[i, j] = omega[i - 1, j]
             
 
     omega_history.append(omega.copy())
@@ -395,7 +297,7 @@ for n in range(1, num_time_steps):
 #                 if (u[i, j] < 0):
 #                     delta_u_omega = u[i + 1, j] * omega[i + 1, j] - u[i, j] * omega[i, j]
 #                 elif (u[i, j] > 0):
-#                     delta_u_omega = u[i, j] * omega[i, j] - u[i - 1, j]
+#                     delta_u_omega = u[i, j] * omega[i, j] - u[i - 1, j] * omega[i - 1, j]
                     
 #                 delta_v_omega = 0
 #                 if (v[i, j] < 0):
@@ -440,8 +342,6 @@ for n in range(1, num_time_steps):
 #     psi_history.append(psi.copy())
 #     temp_history.append(temp.copy())
 
-print("\n--- Time Steps Done ---")
-print("--- %.6f seconds ---" % (time.time() - start_time))
 
 def print_data_in_console():
     """ Print the data in the console (readable format) """
@@ -452,11 +352,9 @@ def print_data_in_console():
 ###############################################################
 #  Graphs and Plots
 ###############################################################
-fig = plt.figure(figsize=(10, 10.5))
-
 for plot_index in range(num_time_steps):
     figNum = plot_index
-    # fig = plt.figure(figNum, figsize=(10, 10.5))
+    fig = plt.figure(figNum, figsize=(10, 10.5))
 
 
 
@@ -534,12 +432,8 @@ for plot_index in range(num_time_steps):
 
 
     plt.savefig(fileName + "/images/" + fileName + "-Figure-" + str(figNum) + ".png")
-    plt.clf()
+    plt.show()
 
-    print("Frame: " + str(figNum + 1) + " of " + str(num_time_steps))
-
-print("\n--- Figures Done ---")
-print("--- %.6f seconds ---" % (time.time() - start_time))
 
 
 
@@ -564,7 +458,4 @@ def generate_video():
 
     cv2.destroyAllWindows()
     video.release()
-generate_video()
-
-print("\n--- Video Done ---")
-print("--- %.6f seconds ---" % (time.time() - start_time))
+# generate_video()
