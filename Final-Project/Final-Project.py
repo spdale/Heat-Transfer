@@ -22,7 +22,7 @@ fileName = "Final-Project"
 height = 200
 width = 500
 
-num_time_steps = 10
+num_time_steps = 2
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -55,9 +55,9 @@ h = min(h_1, h_2)       # grid spacing
 dt = (h / U_inf) / 2
 
 
-omega = np.zeros((width, height))           # vorticity
-psi = np.zeros((width, height))             # streamfunction
-temp = np.zeros((width, height)) + T_init   # temperature
+omega = np.zeros((width, height))               # vorticity
+psi = np.zeros((width, height))                 # streamfunction
+temps = np.zeros((width, height)) + T_init      # temperature
 
 
 def in_circle(x, y): 
@@ -113,9 +113,9 @@ def is_outflow_boundary(x, y):
     return False
 
 
-
 solid_rows = []
 solid_cols = []
+# solid_points = []
 
 def solid_body_setup(width, height):
     for i in range(width):
@@ -124,7 +124,10 @@ def solid_body_setup(width, height):
             if (dist <= cylinder_radius):
                 solid_rows.append(i)
                 solid_cols.append(j)
+    solid_points = list(zip(solid_rows, solid_cols))
 solid_body_setup(width, height)
+
+solid_points = list(zip(solid_rows, solid_cols))
 
 def test_solid_setup():
     solid_body_test = np.zeros((width, height))
@@ -140,6 +143,57 @@ def test_solid_setup():
 
     plt.show()
 # test_solid_setup()
+
+
+wall_rows = []
+wall_cols = []
+wall_adj_rows = []
+wall_adj_cols = []
+
+def wall_setup():
+    count = 0
+    for i in range(width):
+        for j in range(height):
+            if (i, j) in solid_points:
+                count += 1
+                if (i - 1, j) not in solid_points:
+                    wall_rows.append(i)
+                    wall_cols.append(j)
+                    wall_adj_rows.append(i - 1)
+                    wall_adj_cols.append(j)
+                elif (i + 1, j) not in solid_points:
+                    wall_rows.append(i)
+                    wall_cols.append(j)
+                    wall_adj_rows.append(i + 1)
+                    wall_adj_cols.append(j)
+                elif (i, j - 1) not in solid_points:
+                    wall_rows.append(i)
+                    wall_cols.append(j)
+                    wall_adj_rows.append(i)
+                    wall_adj_cols.append(j - 1)
+                elif (i, j + 1) not in solid_points:
+                    wall_rows.append(i)
+                    wall_cols.append(j)
+                    wall_adj_rows.append(i)
+                    wall_adj_cols.append(j + 1)
+wall_setup()
+
+def test_wall_setup():
+    wall_test = np.zeros((width, height))
+    wall_test[wall_rows, wall_cols] = 1
+    wall_test[wall_adj_rows, wall_adj_cols] = 2
+
+
+    figNum = 4
+    fig = plt.figure(figNum)
+    plt.axes().set_aspect('equal')
+    data_graphable = np.flipud(np.rot90(wall_test))
+
+    plt.pcolor(data_graphable)
+
+    plt.show()
+# test_wall_setup()
+
 
 
 def gauss_seidel_iteration(data, initial = False):
@@ -170,8 +224,8 @@ def gauss_seidel_iteration(data, initial = False):
         data[solid_rows, solid_cols] = 0
 
 
-        temp_array = np.absolute(data - data_old)
-        error_array = np.divide(temp_array, data_old, out = np.zeros_like(data), where = ((temp_array != 0) & (data_old != 0)))
+        data_abs_diff = np.absolute(data - data_old)
+        error_array = np.divide(data_abs_diff, data_old, out = np.zeros_like(data), where = ((data_abs_diff != 0) & (data_old != 0)))
         error_array[error_array == np.inf] = 0
         error_term = np.amax(error_array)
 
@@ -186,7 +240,7 @@ def gauss_seidel_iteration(data, initial = False):
 #  Initial Conditions
 ###############################################################
 psi[solid_rows, solid_cols] = 0
-temp[solid_rows, solid_cols] = T_surface
+temps[solid_rows, solid_cols] = T_surface
 
 psi[:, cylinder_center[1]] = 0
 psi[:, 0] = -free_lid
@@ -245,7 +299,7 @@ v = np.zeros((width, height))
 
 omega_history = [omega.copy()]
 psi_history = [psi.copy()]
-temp_history = [temp.copy()]
+temps_history = [temps.copy()]
 
 
 
@@ -266,20 +320,25 @@ temp_history = [temp.copy()]
 
 delta_u_omega = np.zeros((width, height))
 delta_v_omega = np.zeros((width, height))
+
 vorticity_laplacian = np.zeros((width, height))
 
+u_delta_T = np.zeros((width, height))
+v_delta_T = np.zeros((width, height))
+temps_laplacian = np.zeros((width, height))
+
+
+
 for n in range(1, num_time_steps):
-    # u[CURRENT] = (psi[1:-1, 2:  ] - psi[1:-1,0:-2]) / (2 * h)
-    # v[CURRENT] = (psi[0:-2, 1:-1] - psi[2:,  1:-1]) / (2 * h)
     u[CURRENT] = (psi[UP] - psi[DOWN]) / (2 * h)
     v[CURRENT] = (psi[LEFT] - psi[RIGHT]) / (2 * h)
 
     delta_u_omega.fill(0)
     delta_v_omega.fill(0)
-
-    # delta_u_omega = [u[RIGHT] * omega[RIGHT] - u[CURRENT] * omega[CURRENT] if u[CURRENT] < 0]
-    # error_array[error_array == np.inf] = 0
     
+    u_delta_T.fill(0)
+    v_delta_T.fill(0)
+
     u_neg_ind = np.nonzero(u < 0)
     u_pos_ind = np.nonzero(u > 0)
     v_neg_ind = np.nonzero(v < 0)
@@ -309,23 +368,37 @@ for n in range(1, num_time_steps):
 
     vorticity_laplacian[CURRENT] = (omega[UP] + omega[DOWN] + omega[LEFT] + omega[RIGHT] - 4 * omega[CURRENT]) / (h * h)
 
-    # print("omega")
-    # print(omega.shape)
-    # print("delta_u_omega")
-    # print(delta_u_omega.shape)
-    # print("delta_v_omega")
-    # print(delta_v_omega.shape)
-    # print("vorticity_laplacian")
-    # print(vorticity_laplacian.shape)
-    # omega += dt * (-delta_u_omega - delta_v_omega) / h + nu * vorticity_laplacian
+    omega += dt * (-delta_u_omega - delta_v_omega) / h + nu * vorticity_laplacian
 
 
     psi = gauss_seidel_iteration(psi)
 
-    if ((n + 1) % 10 == 0):
-        print("Time Step: " + str(n + 1) + " of " + str(num_time_steps))
 
-    #### Still need temperature stuff and solid_boundary and outflow boundary
+
+
+    u_delta_T[u_neg_ind] = u[u_neg_ind] * (temps[u_neg_ind_right] - temps[u_neg_ind])
+    u_delta_T[u_pos_ind] = u[u_pos_ind] * (temps[u_pos_ind] - temps[u_pos_ind_left])
+
+    v_delta_T[v_neg_ind] = v[v_neg_ind] * (temps[v_neg_ind_up] - temps[v_neg_ind])
+    v_delta_T[v_pos_ind] = v[v_pos_ind] * (temps[v_pos_ind] - temps[v_pos_ind_down])
+
+    temps_laplacian[CURRENT] = (temps[UP] + temps[DOWN] + temps[LEFT] + temps[RIGHT] - 4 * temps[CURRENT]) / (h * h)
+
+    temps = temps + dt * ((-u_delta_T - v_delta_T) / h + alpha * temps_laplacian)
+
+
+
+    # Outflow Boundary Conditions: 
+    psi[width - 1, :] = 2 * psi[width - 2, :] - psi[width - 3, :]
+    omega[width - 1, :] = omega[width - 2, :]
+
+
+
+    
+    # if ((n + 1) % 10 == 0):
+    #     print("Time Step: " + str(n) + " of " + str(num_time_steps))
+
+    print("Time Step: " + str(n) + " of " + str(num_time_steps))
 
 
 
@@ -381,7 +454,7 @@ for n in range(1, num_time_steps):
 
     omega_history.append(omega.copy())
     psi_history.append(psi.copy())
-    temp_history.append(temp.copy())
+    temps_history.append(temps.copy())
 
 # for n in range(1, num_time_steps):
 #     for i in range(width):
@@ -517,7 +590,7 @@ for plot_index in range(num_time_steps):
     #  Temperature Plot
     ###############################################################
     sub3 = fig.add_subplot(3, 1, 3, aspect = 'equal')
-    data_graphable = np.flipud(np.rot90(temp_history[plot_index]))
+    data_graphable = np.flipud(np.rot90(temps_history[plot_index]))
     plt.title("Temperature")
 
     plt.style.use('classic')
