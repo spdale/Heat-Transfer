@@ -22,7 +22,7 @@ fileName = "Final-Project"
 height = 200
 width = 500
 
-num_time_steps = 2
+num_time_steps = 50
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -289,7 +289,7 @@ def test_initial_setup():
     plt.show()
 # test_initial_setup()
 
-
+print("Time Step: 1 of " + str(num_time_steps))
 
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
@@ -330,6 +330,11 @@ temps_laplacian = np.zeros((width, height))
 
 
 for n in range(1, num_time_steps):
+    
+    omega[wall_rows][wall_cols] = -2 * (psi[wall_adj_rows][wall_adj_cols] - psi[wall_rows][wall_cols]) / (h * h)
+
+
+
     u[CURRENT] = (psi[UP] - psi[DOWN]) / (2 * h)
     v[CURRENT] = (psi[LEFT] - psi[RIGHT]) / (2 * h)
 
@@ -393,64 +398,13 @@ for n in range(1, num_time_steps):
     omega[width - 1, :] = omega[width - 2, :]
 
 
-
     
     # if ((n + 1) % 10 == 0):
     #     print("Time Step: " + str(n) + " of " + str(num_time_steps))
 
-    print("Time Step: " + str(n) + " of " + str(num_time_steps))
+    print("Time Step: " + str(n + 1) + " of " + str(num_time_steps))
 
 
-
-
-    # for i in range(width):
-    #     for j in range(height):
-    #         if not is_boundary_condition(i, j):
-    #             # Bulk Fluid
-    #             delta_u_omega = 0
-    #             if (u[i, j] < 0):
-    #                 delta_u_omega = u[i + 1, j] * omega[i + 1, j] - u[i, j] * omega[i, j]
-    #             elif (u[i, j] > 0):
-    #                 delta_u_omega = u[i, j] * omega[i, j] - u[i - 1, j]
-                    
-    #             delta_v_omega = 0
-    #             if (v[i, j] < 0):
-    #                 delta_v_omega = v[i, j + 1] * omega[i, j + 1] - v[i, j] * omega[i, j]
-    #             elif (v[i, j] > 0):
-    #                 delta_v_omega = v[i, j] * omega[i, j] - v[i, j - 1] * omega[i, j - 1]
-
-    #             vorticity_laplacian = (omega[i + 1, j] + omega[i - 1, j] + omega[i, j + 1] + omega[i, j - 1] - 4 * omega[i, j]) / (h ** 2)
-
-    #             omega[i, j] = omega[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
-
-
-    #             psi = gauss_seidel_iteration(psi, error_limit, omega)
-
-
-    #             u_delta_T = 0
-    #             if (u[i, j] < 0):
-    #                 u_delta_T = u[i, j] * (temp[i + 1, j] - temp[i, j])
-    #             elif (u[i, j] < 0): 
-    #                 u_delta_T = u[i, j] * (temp[i, j] - temp[i - 1, j])
-
-    #             v_delta_T = 0
-    #             if (v[i, j] < 0):
-    #                 v_delta_T = v[i, j] * (temp[i, j + 1] - temp[i, j])
-    #             elif (v[i, j] > 0):
-    #                 v_delta_T = v[i, j] * (temp[i, j] - temp[i, j - 1])
-                
-    #             temp_laplacian = (temp[i + 1, j] + temp[i - 1, j] + temp[i, j + 1] + temp[i, j - 1] - 4 * temp[i, j]) / (h ** 2)
-
-    #             temp[i, j] = temp[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * temp_laplacian)
-
-    #         if solid_boundary(i, j, checked = False):
-    #             (adj_ext_pt_x, adj_ext_pt_y) = solid_boundary(i, j, checked = True)
-    #             omega[i, j] = -2 * (psi[adj_ext_pt_x, adj_ext_pt_y] - psi[i, j]) / (h ** 2)
-
-    #         if is_outflow_boundary(i, j):
-    #             psi[i, j] = 2 * psi[i - 1, j] - psi[i - 2, j]
-    #             omega[i, j] = omega[i - 1, j]
-            
 
     omega_history.append(omega.copy())
     psi_history.append(psi.copy())
