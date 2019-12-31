@@ -200,9 +200,31 @@ def test_wall_setup():
 
 bulk_rows = []
 bulk_cols = []
+
 def bulk_setup():
-    for i in range(width):
-        for j in range(height):
+    for i in range(1, width - 1):
+        for j in range(1, height - 1):
+            if (i, j) not in solid_points:
+                bulk_rows.append(i)
+                bulk_cols.append(j)
+bulk_setup()
+
+bulk_points = list(zip(bulk_rows, bulk_cols))
+
+def test_bulk_setup():
+    bulk_test = np.zeros((width, height))
+    bulk_test[bulk_rows, bulk_cols] = 1
+
+
+    figNum = 5
+    fig = plt.figure(figNum)
+    plt.axes().set_aspect('equal')
+    data_graphable = np.flipud(np.rot90(bulk_test))
+
+    plt.pcolor(data_graphable)
+
+    plt.show()
+test_bulk_setup()
 
 
 def gauss_seidel_iteration(data, initial = False):
