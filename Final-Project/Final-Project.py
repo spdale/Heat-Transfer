@@ -12,11 +12,11 @@ start_time = time.time()
 
 
 
-CURRENT = slice(1, -1), slice(1, -1)
-LEFT    = slice(0, -2), slice(1, -1)
-RIGHT   = slice(2, None),    slice(1, -1)
-DOWN    = slice(1, -1), slice(0, -2)
-UP      = slice(1, -1), slice(2, None)
+CURRENT = slice(1, -1),   slice(1, -1)
+LEFT    = slice(0, -2),   slice(1, -1)
+RIGHT   = slice(2, None), slice(1, -1)
+DOWN    = slice(1, -1),   slice(0, -2)
+UP      = slice(1, -1),   slice(2, None)
 
 
 fileName = "Final-Project"
@@ -53,66 +53,16 @@ nu = 1.48 * 10**(-5)        # m^2/s     Kinematic Viscosity at 300K
 h_1 = (10 - 1) * nu / U_inf
 h_2 = (10 - 1) * alpha / U_inf
 h = min(h_1, h_2)       # grid spacing
-h = 0.5
 dt = (h / U_inf) / 2
 
-print(U_inf * 50 / Re_D)
+
+
+###############################################################
+#  Setup Grid Points and Solid Body
+###############################################################
 omega = np.zeros((width, height))               # vorticity
 psi = np.zeros((width, height))                 # streamfunction
 temps = np.zeros((width, height)) + T_init      # temperature
-
-
-def in_circle(x, y): 
-    """ Determine if parameters x and y are in the cylinder's 2d circle profile. """
-    dist = np.sqrt((x - cylinder_center[0])**2 + (y - cylinder_center[1])**2)
-    if (dist <= cylinder_radius):
-        return True
-    return False
-
-def is_boundary_condition(x, y):
-    """ @return: True if (x,y) is a position determined by boundary conditions. """
-    if (y == 0):
-        return True
-    if (y == (height - 1)):
-        return True
-    if (x == 0):
-        return True
-    if (x == (width - 1)):
-        return True
-    if in_circle(x, y):
-        return True
-    return False
-
-def solid_boundary(x, y, checked = False):
-    """ 
-    Determine if (x,y) is a point along the wall of a solid body.
-
-    @param checked: False if checking whether the point is a solid body.
-                    True if determining what the adjacent free (outside of solid body) point is. 
-    
-    @return: if checked = False: True if a wall point (adjacent to fluid) of body.
-             if checked = True: returns (x, y) values of the adjacent point in the fluid (i.e. outside of the solid body).
-    """
-    if not checked: 
-        if in_circle(x, y) and (not in_circle(x - 1, y) or not in_circle(x + 1, y) or not in_circle(x, y - 1) or not in_circle(x, y + 1)): 
-            return True
-    if checked: 
-        if in_circle(x, y):
-            if not in_circle(x - 1, y):
-                return (x - 1, y)
-            if not in_circle(x + 1, y):
-                return (x + 1, y)
-            if not in_circle(x, y - 1):
-                return (x, y - 1)
-            if not in_circle(x, y + 1):
-                return (x, y + 1)
-    return False
-
-def is_outflow_boundary(x, y):
-    """ Determine if (x,y) is at outflow boundary. """
-    if (x == (width - 1)) and (y != 0) and (y != (height - 1)):
-        return True
-    return False
 
 
 solid_rows = []
@@ -274,11 +224,8 @@ psi[:, cylinder_center[1]] = 0
 psi[:, 0] = -free_lid
 psi[:, (height - 1)] = free_lid
 
-
-for i in range(width):
-    for j in range(height):
-        if not is_boundary_condition(i, j):
-            psi[i, j] = U_inf * j - free_lid
+for (i, j) in bulk_points:
+    psi[i, j] = U_inf * j - free_lid
 
 psi = gauss_seidel_iteration(psi, initial = True)
 
@@ -317,6 +264,8 @@ def test_initial_setup():
 
 print("Time Step: 1 of " + str(num_time_steps))
 
+
+
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
@@ -332,10 +281,10 @@ wall_rows_right = [x + 1 for x in wall_rows]
 wall_cols_down = [y - 1 for y in wall_cols]
 wall_cols_up = [y + 1 for y in wall_cols]
 
-bulk_rows_left = [x - 1 for x in bulk_rows]
-bulk_rows_right = [x + 1 for x in bulk_rows]
-bulk_cols_down = [y - 1 for y in bulk_cols]
-bulk_cols_up = [y + 1 for y in bulk_cols]
+# bulk_rows_left = [x - 1 for x in bulk_rows]
+# bulk_rows_right = [x + 1 for x in bulk_rows]
+# bulk_cols_down = [y - 1 for y in bulk_cols]
+# bulk_cols_up = [y + 1 for y in bulk_cols]
 
 # u_delta_T = np.zeros((width, height))
 # v_delta_T = np.zeros((width, height))
