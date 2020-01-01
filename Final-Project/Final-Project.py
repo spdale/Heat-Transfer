@@ -27,7 +27,7 @@ generate_video = False
 height = 200
 width = 500
 
-num_time_steps = 50
+num_time_steps = 4
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -49,17 +49,14 @@ T_init = min(T_surface, T_boundary) # Bulk fluid initial temp
 alpha = 22.07 * 10**(-6)    # m^2/s     Thermal Diffusivity at 300K
 nu = 1.48 * 10**(-5)        # m^2/s     Kinematic Viscosity at 300K
 
+
 h_1 = (10 - 1) * nu / U_inf
 h_2 = (10 - 1) * alpha / U_inf
 h = min(h_1, h_2)       # grid spacing
-
-print(h_1)
-print(h_2)
-print(h)
-
+h = 0.5
 dt = (h / U_inf) / 2
 
-
+print(U_inf * 50 / Re_D)
 omega = np.zeros((width, height))               # vorticity
 psi = np.zeros((width, height))                 # streamfunction
 temps = np.zeros((width, height)) + T_init      # temperature
@@ -340,9 +337,9 @@ bulk_rows_right = [x + 1 for x in bulk_rows]
 bulk_cols_down = [y - 1 for y in bulk_cols]
 bulk_cols_up = [y + 1 for y in bulk_cols]
 
-u_delta_T = np.zeros((width, height))
-v_delta_T = np.zeros((width, height))
-temps_laplacian = np.zeros((width, height))
+# u_delta_T = np.zeros((width, height))
+# v_delta_T = np.zeros((width, height))
+# temps_laplacian = np.zeros((width, height))
 
 
 for n in range(1, num_time_steps):
@@ -352,8 +349,6 @@ for n in range(1, num_time_steps):
     # omega[wall_rows][wall_cols] = -2 * (psi[wall_adj_rows][wall_adj_cols] - psi[wall_rows][wall_cols]) / (h * h)
 
     omega[wall_rows, wall_cols] = -2 / (h * h) * (psi[wall_rows_right, wall_cols] + psi[wall_rows_left, wall_cols] + psi[wall_rows, wall_cols_up] + psi[wall_rows, wall_cols_down])
-
-    # omega[wall_rows, wall_cols] = 10
 
 
     u.fill(0)
@@ -447,6 +442,9 @@ for n in range(1, num_time_steps):
     # temps[solid_rows, solid_cols] = T_surface
     # temps[:, 0] = T_boundary
     # temps[:, (height - 1)] = T_boundary
+
+
+
 
 
 
