@@ -27,7 +27,7 @@ generate_video = False
 height = 200
 width = 500
 
-num_time_steps = 4
+num_time_steps = 100
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -290,6 +290,20 @@ wall_cols_up = [y + 1 for y in wall_cols]
 # v_delta_T = np.zeros((width, height))
 # temps_laplacian = np.zeros((width, height))
 
+delta_u_omega = np.zeros((width, height))
+delta_v_omega = np.zeros((width, height))
+
+vorticity_laplacian = np.zeros((width, height))
+
+u_delta_T = np.zeros((width, height))
+v_delta_T = np.zeros((width, height))
+temps_laplacian = np.zeros((width, height))
+
+bulk_rows_left = [x - 1 for x in bulk_rows]
+bulk_rows_right = [x + 1 for x in bulk_rows]
+bulk_cols_down = [y - 1 for y in bulk_cols]
+bulk_cols_up = [y + 1 for y in bulk_cols]
+
 
 for n in range(1, num_time_steps):
     omega_prev = omega.copy()
@@ -303,31 +317,35 @@ for n in range(1, num_time_steps):
     u.fill(0)
     v.fill(0)
 
+    ### Method 2 (Slowly):
+
     for (i, j) in bulk_points:
         u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
         v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
 
 
-    for (i, j) in bulk_points:
-        delta_u_omega = 0
+    # for (i, j) in bulk_points:
+    #     delta_u_omega = 0
 
-        if (u[i, j] < 0):
-            delta_u_omega = u[i + 1, j] * omega_prev[i + 1, j] - u[i, j] * omega_prev[i, j]
-        elif (u[i, j] > 0):
-            delta_u_omega = u[i, j] * omega_prev[i, j] - u[i - 1, j]
+    #     if (u[i, j] < 0):
+    #         delta_u_omega = u[i + 1, j] * omega_prev[i + 1, j] - u[i, j] * omega_prev[i, j]
+    #     elif (u[i, j] > 0):
+    #         delta_u_omega = u[i, j] * omega_prev[i, j] - u[i - 1, j]
             
-        delta_v_omega = 0
-        if (v[i, j] < 0):
-            delta_v_omega = v[i, j + 1] * omega_prev[i, j + 1] - v[i, j] * omega_prev[i, j]
-        elif (v[i, j] > 0):
-            delta_v_omega = v[i, j] * omega_prev[i, j] - v[i, j - 1] * omega_prev[i, j - 1]
+    #     delta_v_omega = 0
+    #     if (v[i, j] < 0):
+    #         delta_v_omega = v[i, j + 1] * omega_prev[i, j + 1] - v[i, j] * omega_prev[i, j]
+    #     elif (v[i, j] > 0):
+    #         delta_v_omega = v[i, j] * omega_prev[i, j] - v[i, j - 1] * omega_prev[i, j - 1]
 
-        vorticity_laplacian = (omega_prev[i + 1, j] + omega_prev[i - 1, j] + omega_prev[i, j + 1] + omega_prev[i, j - 1] - 4 * omega_prev[i, j]) / (h * h)
+    #     vorticity_laplacian = (omega_prev[i + 1, j] + omega_prev[i - 1, j] + omega_prev[i, j + 1] + omega_prev[i, j - 1] - 4 * omega_prev[i, j]) / (h * h)
 
-        omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
+    #     omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * vorticity_laplacian)
         
 
+    psi = gauss_seidel_iteration(psi)
 
+    for (i, j) in bulk_points:
         u_delta_T = 0
         if (u[i, j] < 0):
             u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
@@ -349,13 +367,15 @@ for n in range(1, num_time_steps):
 
 
 
-    psi = gauss_seidel_iteration(psi)
+    ### End Method 2
 
 
+    # print(np.amax(omega))
 
 
+    
 
-
+    ### Method 1 (Fast):
     # u_delta_T.fill(0)
     # v_delta_T.fill(0)
 
@@ -378,6 +398,26 @@ for n in range(1, num_time_steps):
     # v_pos_ind_down[:][0][:] += -1       # Should this be 1?
 
 
+    # delta_u_omega[u_neg_ind] = u[u_neg_ind_right] * omega[u_neg_ind_right] - u[u_neg_ind] * omega[u_neg_ind]
+    # delta_u_omega[u_pos_ind] = u[u_pos_ind] * omega[u_pos_ind] - u[u_pos_ind_left] * omega[u_pos_ind_left]
+    
+    # delta_v_omega[v_neg_ind] = v[v_neg_ind_up] * omega[v_neg_ind_up] - v[v_neg_ind] * omega[v_neg_ind]
+    # delta_v_omega[v_pos_ind] = v[v_pos_ind] * omega[v_pos_ind] - v[v_pos_ind_down] * omega[v_pos_ind_down]
+
+    # vorticity_laplacian[CURRENT] = (omega[UP] + omega[DOWN] + omega[LEFT] + omega[RIGHT] - 4 * omega[CURRENT]) / (h * h)
+
+    # omega[CURRENT] += dt * (-delta_u_omega[CURRENT] - delta_v_omega[CURRENT]) / h + nu * vorticity_laplacian[CURRENT]
+
+
+
+
+
+    # psi = gauss_seidel_iteration(psi)
+
+
+
+
+
     # u_delta_T[u_neg_ind] = u[u_neg_ind] * (temps_prev[u_neg_ind_right] - temps_prev[u_neg_ind])
     # u_delta_T[u_pos_ind] = u[u_pos_ind] * (temps_prev[u_pos_ind] - temps_prev[u_pos_ind_left])
 
@@ -393,7 +433,7 @@ for n in range(1, num_time_steps):
     # temps[:, (height - 1)] = T_boundary
 
 
-
+    ### End Method 1
 
 
 
@@ -569,8 +609,8 @@ def generate_video():
 
     cv2.destroyAllWindows()
     video.release()
+
+    print("\n--- Video Done ---")
+    print("--- %.6f seconds ---" % (time.time() - start_time))
 if generate_video:
     generate_video()
-
-print("\n--- Video Done ---")
-print("--- %.6f seconds ---" % (time.time() - start_time))
