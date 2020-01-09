@@ -10,6 +10,8 @@ import os
 import time
 start_time = time.time()
 
+import pickle
+
 
 
 CURRENT = slice(1, -1),   slice(1, -1)
@@ -20,14 +22,16 @@ UP      = slice(1, -1),   slice(2, None)
 
 
 fileName = "Final-Project"
+database_filename = "data.pickle"
+setup_database_filename = "setup_data.pickle"
 
 final_frame_only = False
-generate_video = False
+generate_video_from_frames = False
 
 height = 200
 width = 500
 
-num_time_steps = 10
+num_time_steps = 2
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -47,9 +51,9 @@ T_init = min(T_surface, T_boundary) # Bulk fluid initial temp
 
 # Constants picked for air around room temp
 alpha = 22.07 * 10**(-6)    # m^2/s     Thermal Diffusivity at 300K
-alpha = 0.1463 * 10**(-6)           # water at 300K
+# alpha = 0.1463 * 10**(-6)           # water at 300K
 nu = 1.48 * 10**(-5)        # m^2/s     Kinematic Viscosity at 300K
-nu = 8.56 * 10**(-7)                # water at 300K
+# nu = 8.56 * 10**(-7)                # water at 300K
 
 
 h_1 = (10 - 1) * nu / U_inf
@@ -58,11 +62,52 @@ h = min(h_1, h_2)       # grid spacing
 
 dt = (h / U_inf) / 2
 
-h = 0.02
-dt = 0.2 * 10**(-3)
+# h = 0.02
+# dt = 0.2 * 10**(-3)
 
 print("h  = " + str(h)) #2mm
 print("dt = " + str(dt)) #0.2ms
+
+
+
+
+
+###############################################################
+#  Database Operations
+###############################################################
+
+def pickle_exists(filename):
+    return os.path.exists(filename)
+
+def remove_pickle(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
+
+def store_data(filename, data):
+    remove_pickle(filename)
+    # ab: using binary mode
+    dbfile = open(filename, 'ab')
+    pickle.dump(data, dbfile)
+    dbfile.close()
+
+def load_data(filename):
+    if os.path.exists(filename):
+        # rb: read binary
+        dbfile = open(filename, 'rb')
+        read = pickle.load(dbfile)
+        dbfile.close()
+
+        return read
+    return False
+
+
+
+
+
+
+
+
+
 
 ###############################################################
 #  Setup Grid Points and Solid Body
@@ -72,141 +117,89 @@ psi = np.zeros((width, height))                 # streamfunction
 temps = np.zeros((width, height)) + T_init      # temperature
 
 
-solid_rows = []
-solid_cols = []
+def setup_functions():
+    def solid_body_setup():
+        solid_rows = []
+        solid_cols = []
+        for i in range(width):
+            for j in range(height): 
+                dist = np.sqrt((i - cylinder_center[0])**2 + (j - cylinder_center[1])**2)
+                if (dist <= cylinder_radius):
+                    solid_rows.append(i)
+                    solid_cols.append(j)
+        return list(zip(solid_rows, solid_cols))
+    solid_points = solid_body_setup()
 
-def solid_body_setup(width, height):
-    for i in range(width):
-        for j in range(height): 
-            dist = np.sqrt((i - cylinder_center[0])**2 + (j - cylinder_center[1])**2)
-            if (dist <= cylinder_radius):
-                solid_rows.append(i)
-                solid_cols.append(j)
-    solid_points = list(zip(solid_rows, solid_cols))
-solid_body_setup(width, height)
+    def wall_setup():
+        wall_rows = []
+        wall_cols = []
 
-solid_points = list(zip(solid_rows, solid_cols))
+        for i in range(width):
+            for j in range(height):
+                if (i, j) in solid_points:
+                    if (i - 1, j) not in solid_points:
+                        wall_rows.append(i)
+                        wall_cols.append(j)
+                    elif (i + 1, j) not in solid_points:
+                        wall_rows.append(i)
+                        wall_cols.append(j)
+                    elif (i, j - 1) not in solid_points:
+                        wall_rows.append(i)
+                        wall_cols.append(j)
+                    elif (i, j + 1) not in solid_points:
+                        wall_rows.append(i)
+                        wall_cols.append(j)
+        
+        return list(zip(wall_rows, wall_cols))
+    wall_points = wall_setup()
 
-def test_solid_setup():
-    solid_body_test = np.zeros((width, height))
-    solid_body_test[solid_rows, solid_cols] = 1
+    def bulk_setup():
+        bulk_rows = []
+        bulk_cols = []
 
+        for i in range(1, width - 1):
+            for j in range(1, height - 1):
+                if (i, j) not in solid_points:
+                    bulk_rows.append(i)
+                    bulk_cols.append(j)
 
-    figNum = 1
-    fig = plt.figure(figNum)
-    plt.axes().set_aspect('equal')
-    data_graphable = np.flipud(np.rot90(solid_body_test))
+        return list(zip(bulk_rows, bulk_cols))
+    bulk_points = bulk_setup()
 
-    plt.pcolor(data_graphable)
+    store_data(setup_database_filename, [solid_points, wall_points, bulk_points])
 
-    plt.show()
-# test_solid_setup()
-
-
-wall_rows = []
-wall_cols = []
-wall_adj_rows = []
-wall_adj_cols = []
-
-def wall_setup():
-    count = 0
-    for i in range(width):
-        for j in range(height):
-            if (i, j) in solid_points:
-                count += 1
-                if (i - 1, j) not in solid_points:
-                    wall_rows.append(i)
-                    wall_cols.append(j)
-                    wall_adj_rows.append(i - 1)
-                    wall_adj_cols.append(j)
-                elif (i + 1, j) not in solid_points:
-                    wall_rows.append(i)
-                    wall_cols.append(j)
-                    wall_adj_rows.append(i + 1)
-                    wall_adj_cols.append(j)
-                elif (i, j - 1) not in solid_points:
-                    wall_rows.append(i)
-                    wall_cols.append(j)
-                    wall_adj_rows.append(i)
-                    wall_adj_cols.append(j - 1)
-                elif (i, j + 1) not in solid_points:
-                    wall_rows.append(i)
-                    wall_cols.append(j)
-                    wall_adj_rows.append(i)
-                    wall_adj_cols.append(j + 1)
-wall_setup()
-
-def test_wall_setup():
-    wall_test = np.zeros((width, height))
-    wall_test[wall_rows, wall_cols] = 1
-    # wall_test[solid_rows, solid_cols] = 1
-    wall_test[wall_adj_rows, wall_adj_cols] = 2
+    return solid_points, wall_points, bulk_points
 
 
-    figNum = 4
-    fig = plt.figure(figNum)
-    plt.axes().set_aspect('equal')
-    data_graphable = np.flipud(np.rot90(wall_test))
-
-    plt.pcolor(data_graphable)
-
-    plt.show()
-# test_wall_setup()
-
-bulk_rows = []
-bulk_cols = []
-
-def bulk_setup():
-    for i in range(1, width - 1):
-        for j in range(1, height - 1):
-            if (i, j) not in solid_points:
-                bulk_rows.append(i)
-                bulk_cols.append(j)
-bulk_setup()
-
-bulk_points = list(zip(bulk_rows, bulk_cols))
-
-def test_bulk_setup():
-    bulk_test = np.zeros((width, height))
-    bulk_test[bulk_rows, bulk_cols] = 1
+if not pickle_exists(setup_database_filename):
+    solid_points, wall_points, bulk_points = setup_functions()
+else:
+    read = load_data(setup_database_filename)
+    solid_points = read[0]
+    wall_points = read[1]
+    bulk_points = read[2]
 
 
-    figNum = 5
-    fig = plt.figure(figNum)
-    plt.axes().set_aspect('equal')
-    data_graphable = np.flipud(np.rot90(bulk_test))
 
-    plt.pcolor(data_graphable)
+wall_x = [x for (x, y) in wall_points]
+wall_y = [y for (x, y) in wall_points]
 
-    plt.show()
-# test_bulk_setup()
 
 
 def gauss_seidel_iteration(data, initial = False):
-    """ 
-    Perform Gauss-Seidel Iteration 
-
-    @param data: 2D array (width, height) of values to be relaxed by Gauss-Seidel Iteration
-    @param initial: Determines which Poisson/Laplacian equation will be used.
-
-    @return: data array post-relaxation iteration (same dimensions as @param data). 
-    """
     error_flag = True
     while error_flag:
         data_old = data.copy()
 
-        # data[i, j] = data[i, j] + (F / 4) * (data[i + 1, j] + data[i - 1, j] + data[i, j + 1] + data[i, j - 1] - 4 * data[i, j])
-        # data[1:-1, 1:-1] = data[1:-1, 1:-1] + (1 / 4) * (data[0:-2, 1:-1] + data[2:, 1:-1] + data[1:-1,0:-2] + data[1:-1, 2:] - 4 * data[1:-1, 1:-1])
+        # data = [data[i, j] + (F / 4) * (data_old[i + 1, j] + data[i - 1, j] + data_old[i, j + 1] + data[i, j - 1] - 4 * data[i, j]) for (i, j) in bulk_points]
 
-        data[CURRENT] = data[CURRENT] + (1 / 4) * (data[LEFT] + data[RIGHT] + data[DOWN] + data[UP] - 4 * data[CURRENT])
-        if not initial:
-            data[CURRENT] = data[CURRENT] + h * h * omega[CURRENT]   # Multiply by F
+        # data[CURRENT] = data_old[CURRENT] + (F / 4) * (data_old[LEFT] + data[RIGHT] + data_old[DOWN] + data[UP] - 4 * data_old[CURRENT])
+
+        for (i, j) in bulk_points:
+            data[i, j] = data[i, j] + (F / 4) * (data[i + 1, j] + data[i - 1, j] + data[i, j + 1] + data[i, j - 1] - 4 * data[i, j])
 
         data[0, :] = data[3, :]
         data[width - 1, :] = data[width - 2, :]
-
-        
-        data[solid_rows, solid_cols] = 0
 
 
         data_abs_diff = np.absolute(data - data_old)
@@ -221,55 +214,65 @@ def gauss_seidel_iteration(data, initial = False):
 
 
 
-###############################################################
-#  Initial Conditions
-###############################################################
-psi[solid_rows, solid_cols] = 0
-temps[solid_rows, solid_cols] = T_surface
-
-psi[:, cylinder_center[1]] = 0
-psi[:, 0] = -free_lid
-psi[:, (height - 1)] = free_lid
-
-for (i, j) in bulk_points:
-    psi[i, j] = U_inf * j - free_lid
-
-psi = gauss_seidel_iteration(psi, initial = True)
-
-print("--- Initial Psi Setup ---")
-print("--- %.7f seconds ---\n" % (time.time() - start_time))
 
 
-def test_initial_setup():
-    figNum = 2
-    fig = plt.figure(figNum)
-    plt.axes().set_aspect('equal')
-    data_graphable = np.flipud(np.rot90(psi))
 
 
-    num_streamlines = 31
-    max_streamline = np.max(data_graphable)
-    min_streamline = np.min(data_graphable)
-    contours_before = np.linspace(min_streamline, max_streamline, num=(num_streamlines + 3))
-    contours = contours_before[(contours_before != 0) & (contours_before != min_streamline) & (contours_before != max_streamline)]
-
-    plt.contour(data_graphable, levels = contours, colors = 'black', linestyles = 'solid')
 
 
-    plt.xlim(0, width)
-    plt.ylim(0, height)
-    plt.xticks(np.arange(0, width + 1, 50))
-    plt.yticks(np.arange(0, height + 1, 20))
-    plt.tick_params(top=True, right=True)
 
-    plt.style.use('grayscale')
-    heatmap = plt.pcolor(data_graphable)
-    plt.clim(np.amin(data_graphable), np.amax(data_graphable))
 
-    plt.show()
-# test_initial_setup()
 
-print("Time Step: 1 of " + str(num_time_steps))
+def initial_conditions(psi):
+    ###############################################################
+    #  Initial Conditions
+    ###############################################################
+    for (i, j) in solid_points:
+        temps[i, j] = T_surface
+
+    psi[:, cylinder_center[1]] = 0
+    psi[:, 0] = -free_lid
+    psi[:, (height - 1)] = free_lid
+
+    for (i, j) in bulk_points:
+        psi[i, j] = U_inf * j - free_lid
+
+    psi = gauss_seidel_iteration(psi, initial = True)
+
+    # psi = loadData()
+
+    print("--- Initial Psi Setup ---")
+    print("--- %.7f seconds ---\n" % (time.time() - start_time))
+
+
+    # storeData(psi)
+
+    print("Time Step: 1 of " + str(num_time_steps))
+
+    omega_history = [omega.copy()]
+    psi_history = [psi.copy()]
+    temps_history = [temps.copy()]
+
+    store_data(database_filename, [omega_history, psi_history, temps_history])
+
+    return psi, omega, temps, omega_history, psi_history, temps_history
+
+
+
+if not pickle_exists(database_filename):
+    psi, omega, temps, omega_history, psi_history, temps_history = initial_conditions(psi)
+else:
+    read = load_data(database_filename)
+    omega_history = read[0]
+    psi_history = read[1]
+    temps_history = read[2]
+
+    omega = omega_history[0]
+    psi = psi_history[0]
+    temps = temps_history[0]
+
+
+
 
 
 
@@ -279,37 +282,37 @@ print("Time Step: 1 of " + str(num_time_steps))
 u = np.zeros((width, height))
 v = np.zeros((width, height))
 
-omega_history = [omega.copy()]
-psi_history = [psi.copy()]
-temps_history = [temps.copy()]
+# omega_history = [omega.copy()]
+# psi_history = [psi.copy()]
+# temps_history = [temps.copy()]
 
-wall_rows_left = [x - 1 for x in wall_rows]
-wall_rows_right = [x + 1 for x in wall_rows]
-wall_cols_down = [y - 1 for y in wall_cols]
-wall_cols_up = [y + 1 for y in wall_cols]
+wall_x_left = [x - 1 for x in wall_x]
+wall_x_right = [x + 1 for x in wall_x]
+wall_y_down = [y - 1 for y in wall_y]
+wall_y_up = [y + 1 for y in wall_y]
+
+# # bulk_rows_left = [x - 1 for x in bulk_rows]
+# # bulk_rows_right = [x + 1 for x in bulk_rows]
+# # bulk_cols_down = [y - 1 for y in bulk_cols]
+# # bulk_cols_up = [y + 1 for y in bulk_cols]
+
+# # u_delta_T = np.zeros((width, height))
+# # v_delta_T = np.zeros((width, height))
+# # temps_laplacian = np.zeros((width, height))
+
+# # delta_u_omega = np.zeros((width, height))
+# # delta_v_omega = np.zeros((width, height))
+
+# # vorticity_laplacian = np.zeros((width, height))
+
+# # u_delta_T = np.zeros((width, height))
+# # v_delta_T = np.zeros((width, height))
+# # temps_laplacian = np.zeros((width, height))
 
 # bulk_rows_left = [x - 1 for x in bulk_rows]
 # bulk_rows_right = [x + 1 for x in bulk_rows]
 # bulk_cols_down = [y - 1 for y in bulk_cols]
 # bulk_cols_up = [y + 1 for y in bulk_cols]
-
-# u_delta_T = np.zeros((width, height))
-# v_delta_T = np.zeros((width, height))
-# temps_laplacian = np.zeros((width, height))
-
-# delta_u_omega = np.zeros((width, height))
-# delta_v_omega = np.zeros((width, height))
-
-# vorticity_laplacian = np.zeros((width, height))
-
-# u_delta_T = np.zeros((width, height))
-# v_delta_T = np.zeros((width, height))
-# temps_laplacian = np.zeros((width, height))
-
-bulk_rows_left = [x - 1 for x in bulk_rows]
-bulk_rows_right = [x + 1 for x in bulk_rows]
-bulk_cols_down = [y - 1 for y in bulk_cols]
-bulk_cols_up = [y + 1 for y in bulk_cols]
 
 
 for n in range(1, num_time_steps):
@@ -318,7 +321,7 @@ for n in range(1, num_time_steps):
 
     # omega[wall_rows][wall_cols] = -2 * (psi[wall_adj_rows][wall_adj_cols] - psi[wall_rows][wall_cols]) / (h * h)
 
-    omega[wall_rows, wall_cols] = -2 / (h * h) * (psi[wall_rows_right, wall_cols] + psi[wall_rows_left, wall_cols] + psi[wall_rows, wall_cols_up] + psi[wall_rows, wall_cols_down] )
+    omega[wall_x, wall_y] = -2 / (h * h) * (psi[wall_x_right, wall_y] + psi[wall_x_left, wall_y] + psi[wall_x, wall_y_up] + psi[wall_x, wall_y_down] )
 
 
     u.fill(0)
@@ -485,6 +488,7 @@ def delete_previous_images():
 delete_previous_images()
 
 
+
 fig = plt.figure(figsize=(10, 10.5))
 
 for plot_index in range(num_time_steps):
@@ -619,5 +623,5 @@ def generate_video():
 
     print("\n--- Video Done ---")
     print("--- %.6f seconds ---" % (time.time() - start_time))
-if generate_video:
+if generate_video_from_frames:
     generate_video()
