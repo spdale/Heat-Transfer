@@ -1,0 +1,11 @@
+omega = zeros(2,5);
+
+
+omega(2,2) = 1;
+omega(2,3) = 1;
+
+omega
+
+omega(find(omega == 1)) = 2
+
+

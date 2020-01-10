@@ -25,7 +25,9 @@ fileName = "Final-Project"
 database_filename = "data.pickle"
 setup_database_filename = "setup_data.pickle"
 
+# final_frame_only = True
 final_frame_only = False
+# generate_video_from_frames = True
 generate_video_from_frames = False
 
 height = 200
@@ -65,8 +67,8 @@ dt = (h / U_inf) / 2
 # h = 0.02
 # dt = 0.2 * 10**(-3)
 
-print("h  = " + str(h)) #2mm
-print("dt = " + str(dt)) #0.2ms
+print("\nh  = " + str(h)) #2mm
+print("dt = " + str(dt) + "\n") #0.2ms
 
 
 
@@ -180,6 +182,8 @@ else:
     bulk_points = read[2]
 
 
+solid_rows = [x for (x, y) in solid_points]
+solid_cols = [y for (x, y) in solid_points]
 
 wall_x = [x for (x, y) in wall_points]
 wall_y = [y for (x, y) in wall_points]
@@ -268,6 +272,36 @@ else:
     psi = read[1]
     temps = read[2]
 
+
+
+
+
+
+
+
+#######################################################################
+# # Old Fashioned
+# for (i, j) in solid_points:
+#         temps[i, j] = T_surface
+
+# psi[:, cylinder_center[1]] = 0
+# psi[:, 0] = -free_lid
+# psi[:, (height - 1)] = free_lid
+
+# for (i, j) in bulk_points:
+#     psi[i, j] = U_inf * j - free_lid
+
+# psi = gauss_seidel_iteration(psi, initial = True)
+
+
+########################################################################
+
+
+
+
+
+
+
 print("Time Step: 1 of " + str(num_time_steps))
 
 
@@ -275,7 +309,6 @@ print("Time Step: 1 of " + str(num_time_steps))
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
- 
 omega_history = [omega.copy()]
 psi_history = [psi.copy()]
 temps_history = [temps.copy()]
@@ -303,31 +336,10 @@ for n in range(1, num_time_steps):
 
     u.fill(0)
     v.fill(0)
-    for (i, j) in bulk_points:
-        u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
-        v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
-
-    
-    for (i, j) in bulk_points:
-        temps[i, j] = v[i, j]
-    
-    # for (i, j) in bulk_points:    
-    #     u_delta_T = 0
-    #     if (u[i, j] < 0):
-    #         u_delta_T = u[i, j] * (temps[i + 1, j] - temps[i, j])
-    #     elif (u[i, j] < 0): 
-    #         u_delta_T = u[i, j] * (temps[i, j] - temps[i - 1, j])
-
-    #     v_delta_T = 0
-    #     if (v[i, j] < 0):
-    #         v_delta_T = v[i, j] * (temps[i, j + 1] - temps[i, j])
-    #     elif (v[i, j] > 0):
-    #         v_delta_T = v[i, j] * (temps[i, j] - temps[i, j - 1])
-        
-    #     laplacian_temps = (temps[i + 1, j] + temps[i - 1, j] + temps[i, j + 1] + temps[i, j - 1] - 4 * temps[i, j]) / (h ** 2)
-
-    #     temps[i, j] = temps[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
-
+    for i in range(1, width - 1):
+        for j in range(1, height - 1):
+            u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
+            v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
 
     # for (i, j) in bulk_points:
     #     laplacian_vorticity = (omega_prev[i + 1, j] + omega_prev[i - 1, j] + omega_prev[i, j + 1] + omega_prev[i, j - 1] - 4 * omega_prev[i, j]) / (h * h)
@@ -347,23 +359,82 @@ for n in range(1, num_time_steps):
     #     omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * laplacian_vorticity)
 
 
-    # for (i, j) in bulk_points: 
-    #     u_delta_T = 0
-    #     if u[i, j] < 0:
-    #         u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
-    #     elif u[i, j] > 0:
-    #         u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
+    # psi = gauss_seidel_iteration(psi)
+
+
+    for (i, j) in bulk_points: 
+        u_delta_T = 0
+        if u[i, j] < 0:
+            u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
+        elif u[i, j] > 0:
+            u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
         
-    #     v_delta_T = 0
-    #     if v[i, j] < 0:
-    #         v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
-    #     elif v[i, j] > 0:
-    #         v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
+        v_delta_T = 0
+        if v[i, j] < 0:
+            v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
+        elif v[i, j] > 0:
+            v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
 
-    #     laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
+        laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
 
-    #     temps[i, j] = temps_prev[i, j] + dt * (-u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
+        temps[i, j] = temps_prev[i, j] + dt * (-u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
     
+
+
+
+
+    # u_delta_T = np.zeros((width, height))
+    # v_delta_T = np.zeros((width, height))
+    # temps_laplacian = np.zeros((width, height))
+
+    # delta_u_omega = np.zeros((width, height))
+    # delta_v_omega = np.zeros((width, height))
+
+    # vorticity_laplacian = np.zeros((width, height))
+
+    # u_delta_T = np.zeros((width, height))
+    # v_delta_T = np.zeros((width, height))
+    # temps_laplacian = np.zeros((width, height))
+
+    # u_delta_T.fill(0)
+    # v_delta_T.fill(0)
+
+    # u_neg_ind = np.nonzero(u < 0)
+    # u_pos_ind = np.nonzero(u > 0)
+    # v_neg_ind = np.nonzero(v < 0)
+    # v_pos_ind = np.nonzero(v > 0)
+
+    # u_neg_ind_right = u_neg_ind[:]
+    # u_neg_ind_right[:][1][:] += 1       # Should this be 0?
+
+    # u_pos_ind_left = u_pos_ind[:]
+    # u_pos_ind_left[:][1][:] += -1       # Should this be 0?
+
+
+    # v_neg_ind_up = v_neg_ind[:]
+    # v_neg_ind_up[:][0][:] += 1          # Should this be 1?
+
+    # v_pos_ind_down = v_pos_ind[:]
+    # v_pos_ind_down[:][0][:] += -1       # Should this be 1?
+
+
+    # u_delta_T[u_neg_ind] = u[u_neg_ind] * (temps_prev[u_neg_ind_right] - temps_prev[u_neg_ind])
+    # u_delta_T[u_pos_ind] = u[u_pos_ind] * (temps_prev[u_pos_ind] - temps_prev[u_pos_ind_left])
+
+    # v_delta_T[v_neg_ind] = v[v_neg_ind] * (temps_prev[v_neg_ind_up] - temps_prev[v_neg_ind])
+    # v_delta_T[v_pos_ind] = v[v_pos_ind] * (temps_prev[v_pos_ind] - temps_prev[v_pos_ind_down])
+
+    # temps_laplacian[CURRENT] = (temps_prev[UP] + temps_prev[DOWN] + temps_prev[LEFT] + temps_prev[RIGHT] - 4 * temps_prev[CURRENT]) / (h * h)
+
+    # temps = temps_prev + dt * ((-u_delta_T - v_delta_T) / h + alpha * temps_laplacian)
+
+    # temps[solid_rows, solid_cols] = T_surface
+    # temps[:, 0] = T_boundary
+    # temps[:, (height - 1)] = T_boundary
+
+
+
+
 
 
 
@@ -388,6 +459,14 @@ for n in range(1, num_time_steps):
 
 print("\n--- Time Steps Done ---")
 print("--- %.6f seconds ---\n" % (time.time() - start_time))
+
+
+
+
+
+
+
+
 
 
 

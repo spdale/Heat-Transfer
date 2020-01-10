@@ -26,7 +26,7 @@ nu = 1.48 * 10^(-5)        % m^2/s     Kinematic Viscosity at 300K
 % nu = 8.56 * 10**(-7)                % water at 300K
 
 
-h_1 = (10 - 1) * nu / U_inf
+h_1 = (10 - 1) * nu / U_inf1
 h_2 = (10 - 1) * alpha / U_inf
 h = min(h_1, h_2)       % grid spacing
 
@@ -35,8 +35,6 @@ dt = (h / U_inf) / 2
 % h = 0.02
 % dt = 0.2 * 10**(-3)
 
-print("h  = " + str(h)) %2mm
-print("dt = " + str(dt)) %0.2ms
 
 
 
