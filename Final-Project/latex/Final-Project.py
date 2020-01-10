@@ -27,7 +27,7 @@ generate_video = False
 height = 200
 width = 500
 
-num_time_steps = 1
+num_time_steps = 10
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -199,9 +199,8 @@ def gauss_seidel_iteration(data, initial = False):
         # data[1:-1, 1:-1] = data[1:-1, 1:-1] + (1 / 4) * (data[0:-2, 1:-1] + data[2:, 1:-1] + data[1:-1,0:-2] + data[1:-1, 2:] - 4 * data[1:-1, 1:-1])
 
         data[CURRENT] = data[CURRENT] + (1 / 4) * (data[LEFT] + data[RIGHT] + data[DOWN] + data[UP] - 4 * data[CURRENT])
-        # data[CURRENT] = data_old[CURRENT] + (F / 4) * (data_old[LEFT] + data_old[RIGHT] + data_old[DOWN] + data_old[UP] - 4 * data_old[CURRENT])
         if not initial:
-            data[CURRENT] += h * h * omega[CURRENT]   # Multiply by F
+            data[CURRENT] = data[CURRENT] + h * h * omega[CURRENT]   # Multiply by F
 
         data[0, :] = data[3, :]
         data[width - 1, :] = data[width - 2, :]

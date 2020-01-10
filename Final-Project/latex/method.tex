@@ -1,0 +1,114 @@
+\section{Method}
+
+
+\subsection{Initial Psi Setup}
+\begin{equation}
+    \psi_{i, j}^{k + 1} = \psi_{i, j}^{k} + \frac{F}{4} \left( \psi_{i + 1, j}^{k} + \psi_{i - 1, j}^{k + 1} + \psi_{i, j + 1}^{k} + \psi_{i, j - 1}^{k + 1} - 4 \psi_{i, j}^{k} \right)
+\end{equation}
+
+\subsection{Wall Conditions}
+\begin{equation}
+    \omega_{w} = -2\frac{\psi_{w + 1} - \psi_{w}}{h^2}
+\end{equation}
+
+
+\subsection{Bulk Fluid}
+\begin{equation}
+    u_{i, j}^{n} = \frac{\psi_{i, j + 1}^{n} - \psi_{i, j - 1}^{n}}{2h}
+\end{equation}
+
+\begin{equation}
+    v_{i, j}^{n} = \frac{\psi_{i - 1, j}^{n} - \psi_{i + 1, j}^{n}}{2h}
+\end{equation}
+
+\begin{equation}
+    \nabla^2\omega_{i, j}^{n} = \frac{\sum \omega_{neighbors}^{n} - 4 \omega_{i, j}^{n}}{h^2} = \frac{\omega_{i - 1, j}^{n} + \omega_{i + 1, j}^{n} + \omega_{i, j - 1}^{n} + \omega_{i, j + 1}^{n} - 4 \omega_{i, j}^{n}}{h^2}
+\end{equation}
+
+
+\begin{equation}
+    \begin{split}
+    \Delta (u \omega)^n  & = \begin{cases} 
+          (u\omega)_{i + 1, j}^{n} - (u\omega)_{i, j}^{n} & u_{i, j}^n < 0 \\
+          0 & u_{i, j}^n = 0 \\
+          (u\omega)_{i, j}^{n} - (u\omega)_{i - 1, j}^{n} & u_{i, j}^n > 0 
+       \end{cases} \\
+        & = \begin{cases} 
+              u_{i + 1, j}^{n}\omega_{i + 1, j}^{n} - u_{i, j}^{n}\omega_{i, j}^{n} & u_{i, j}^n < 0 \\
+              0 & u_{i, j}^n = 0 \\
+              u_{i, j}^{n}\omega_{i, j}^{n} - u_{i - 1, j}^{n}\omega_{i - 1, j}^{n} & u_{i, j}^n > 0 
+           \end{cases}
+    \end{split}
+\end{equation}
+
+
+
+\begin{equation}
+    \begin{split}
+    \Delta (v \omega)^n  & = \begin{cases} 
+          (v\omega)_{i, j}^{n} - (v\omega)_{i, j}^{n} & v_{i, j}^n < 0 \\
+          0 & v_{i, j}^n = 0 \\
+          (v\omega)_{i, j}^{n} - (v\omega)_{i, j}^{n} & v_{i, j}^n > 0 
+       \end{cases} \\
+        & = \begin{cases} 
+              v_{i, j}^{n}\omega_{i, j}^{n} - v_{i, j}^{n}\omega_{i, j}^{n} & v_{i, j}^n < 0 \\
+              0 & v_{i, j}^n = 0 \\
+              v_{i, j}^{n}\omega_{i, j}^{n} - v_{i - 1, j}^{n}\omega_{i - 1, j}^{n} & v_{i, j}^n > 0 
+           \end{cases}
+    \end{split}
+\end{equation}
+
+
+\begin{equation}
+    \omega_{i, j}^{n + 1} = \omega_{i, j}^{n} + \Delta t \left( -\frac{\Delta(u \omega)^n}{h} - \frac{\Delta(v \omega) ^n}{h} + \nu \nabla^2\omega_{i, j}^{n} \right)
+\end{equation}
+
+\begin{equation}
+    \psi_{i, j}^{k + 1} =  \psi_{i, j}^{k + 1} + \frac{F}{4} \left( \psi_{i + 1, j}^{k} + \psi_{i - 1, j}^{k + 1} + \psi_{i, j + 1}^{k} + \psi_{i, j - 1}^{k + 1} + 4 h^2 \omega_{i, j}^{n + 1} - 4\psi_{i, j}^{k} \right)
+\end{equation}
+
+\subsection{Outflow Boundary}
+\begin{equation}
+    \omega_{i, j} = \omega_{i - 1, j}
+\end{equation}
+
+Upper/Lower Boundaries: 
+\begin{equation}
+    \psi = constant
+\end{equation}
+\begin{equation}
+    \omega = 0
+\end{equation}
+
+
+\subsection{Temperature Update}
+\begin{equation}
+    \nabla^2 T_{i, j}^{n} = \frac{\sum T_{neighbors}^{n} - 4 T_{i, j}^{n}}{h^2} = \frac{T_{i - 1, j}^{n} + T_{i + 1, j}^{n} + T_{i, j - 1}^{n} + T_{i, j + 1}^{n} - 4 T_{i, j}^{n}}{h^2}
+\end{equation}
+
+
+\begin{equation}
+    u_{i, j}^{n} (\Delta T)_{i, j}^{n} = \begin{cases} 
+          u_{i, j}^{n} \left( T_{i + 1, j}^{n} - T_{i, j}^{n} \right) & u_{i, j}^{n} < 0 \\
+          0 & u_{i, j}^n = 0 \\
+          u_{i, j}^{n} \left( T_{i, j}^{n} - T_{i - 1, j}^{n} \right) & u_{i, j}^n > 0 
+       \end{cases}
+\end{equation}
+
+\begin{equation}
+    v_{i, j}^{n} (\Delta T)_{i, j}^{n} = \begin{cases} 
+          v_{i, j}^{n} \left( T_{i, j + 1}^{n} - T_{i, j}^{n} \right) & v_{i, j}^{n} < 0 \\
+          0 & v_{i, j}^n = 0 \\
+          v_{i, j}^{n} \left( T_{i, j}^{n} - T_{i, j - 1}^{n} \right) & v_{i, j}^n > 0 
+       \end{cases}
+\end{equation}
+
+
+
+
+
+\begin{equation}
+    T_{i, j}^{n + 1} = T_{i, j}^{n} + \Delta t \left( -\frac{u_{i, j}^{n} (\Delta T)_{i, j}^{n}}{h} - \frac{ v_{i, j}^{n} (\Delta T)_{i, j}^{n}}{h} + \alpha \nabla^2 T_{i, j}^{n} \right)
+\end{equation}
+
+\clearpage

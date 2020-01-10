@@ -1,0 +1,30 @@
+\makeatletter
+\newcommand*{\currentname}{\@currentlabelname}
+\makeatother
+
+\newcommand*{\frontmatter}{\pagenumbering{roman}}
+\newcommand*{\mainmatter}{
+    \pagenumbering{arabic}
+    \pagestyle{fancy}
+    \fancyhf{}
+    \lhead{Final Project Report}
+    \rhead{\currentname}
+    \renewcommand{\footrulewidth}{0.5pt}
+    \rfoot{Page \thepage}
+}
+\newcommand*{\backmatter}{
+    \pagenumbering{Roman}
+    \thispagestyle{plain}
+}
+
+\fancypagestyle{mylandscape}{%
+  \fancyhf{}% Clear header/footer
+  \fancyfoot{% Footer
+    \makebox[\textwidth][r]{% Right
+      \rlap{\hspace{\footskip}% Push out of margin by \footskip
+        \smash{% Remove vertical height
+          \raisebox{\dimexpr.5\baselineskip+\footskip+.5\textheight}{% Raise vertically
+            \rotatebox{90}{\thepage}}}}}}% Rotate counter-clockwise
+  \renewcommand{\headrulewidth}{0pt}% No header rule
+  \renewcommand{\footrulewidth}{0pt}% No footer rule
+}

@@ -25,13 +25,13 @@ fileName = "Final-Project"
 database_filename = "data.pickle"
 setup_database_filename = "setup_data.pickle"
 
-final_frame_only = False
+final_frame_only = True
 generate_video_from_frames = False
 
 height = 200
 width = 500
 
-num_time_steps = 2
+num_time_steps = 20
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -280,7 +280,7 @@ print("Time Step: 1 of " + str(num_time_steps))
 ###############################################################
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
- 
+
 # omega_history = [omega.copy()]
 # psi_history = [psi.copy()]
 # temps_history = [temps.copy()]
@@ -312,27 +312,6 @@ for n in range(1, num_time_steps):
         u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
         v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
 
-    
-    for (i, j) in bulk_points:
-        temps[i, j] = v[i, j]
-    
-    # for (i, j) in bulk_points:    
-    #     u_delta_T = 0
-    #     if (u[i, j] < 0):
-    #         u_delta_T = u[i, j] * (temps[i + 1, j] - temps[i, j])
-    #     elif (u[i, j] < 0): 
-    #         u_delta_T = u[i, j] * (temps[i, j] - temps[i - 1, j])
-
-    #     v_delta_T = 0
-    #     if (v[i, j] < 0):
-    #         v_delta_T = v[i, j] * (temps[i, j + 1] - temps[i, j])
-    #     elif (v[i, j] > 0):
-    #         v_delta_T = v[i, j] * (temps[i, j] - temps[i, j - 1])
-        
-    #     laplacian_temps = (temps[i + 1, j] + temps[i - 1, j] + temps[i, j + 1] + temps[i, j - 1] - 4 * temps[i, j]) / (h ** 2)
-
-    #     temps[i, j] = temps[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
-
 
     # for (i, j) in bulk_points:
     #     laplacian_vorticity = (omega_prev[i + 1, j] + omega_prev[i - 1, j] + omega_prev[i, j + 1] + omega_prev[i, j - 1] - 4 * omega_prev[i, j]) / (h * h)
@@ -352,22 +331,22 @@ for n in range(1, num_time_steps):
     #     omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * laplacian_vorticity)
 
 
-    # for (i, j) in bulk_points: 
-    #     u_delta_T = 0
-    #     if u[i, j] < 0:
-    #         u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
-    #     elif u[i, j] > 0:
-    #         u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
+    for (i, j) in bulk_points: 
+        u_delta_T = 0
+        if u[i, j] < 0:
+            u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
+        elif u[i, j] > 0:
+            u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
         
-    #     v_delta_T = 0
-    #     if v[i, j] < 0:
-    #         v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
-    #     elif v[i, j] > 0:
-    #         v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
+        v_delta_T = 0
+        if v[i, j] < 0:
+            v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
+        elif v[i, j] > 0:
+            v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
 
-    #     laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
+        laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
 
-    #     temps[i, j] = temps_prev[i, j] + dt * (-u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
+        temps[i, j] = temps_prev[i, j] + dt * (-u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
     
 
 

@@ -231,6 +231,8 @@ def initial_conditions(psi):
     ###############################################################
     #  Initial Conditions
     ###############################################################
+    print("Creating T = 0 data.")
+    
     for (i, j) in solid_points:
         temps[i, j] = T_surface
 
@@ -250,30 +252,23 @@ def initial_conditions(psi):
     print("--- %.7f seconds ---\n" % (time.time() - start_time))
 
 
-    omega_history = [omega.copy()]
-    psi_history = [psi.copy()]
-    temps_history = [temps.copy()]
 
-    store_data(database_filename, [omega_history, psi_history, temps_history])
+    store_data(database_filename, [omega, psi, temps])
 
-    return psi, omega, temps, omega_history, psi_history, temps_history
+    return psi, omega, temps
 
 
 
 if not pickle_exists(database_filename):
-    psi, omega, temps, omega_history, psi_history, temps_history = initial_conditions(psi)
+    psi, omega, temps= initial_conditions(psi)
 else:
     read = load_data(database_filename)
-    omega_history = read[0].copy()
-    psi_history = read[1].copy()
-    temps_history = read[2].copy()
-
-    omega = omega_history[0]
-    psi = psi_history[0]
-    temps = temps_history[0]
+    
+    omega = read[0]
+    psi = read[1]
+    temps = read[2]
 
 print("Time Step: 1 of " + str(num_time_steps))
-
 
 
 
@@ -281,9 +276,9 @@ print("Time Step: 1 of " + str(num_time_steps))
 #  Initial Conditions established, now "turn on" vorticity
 ###############################################################
  
-# omega_history = [omega.copy()]
-# psi_history = [psi.copy()]
-# temps_history = [temps.copy()]
+omega_history = [omega.copy()]
+psi_history = [psi.copy()]
+temps_history = [temps.copy()]
 
 wall_x_left = [x - 1 for x in wall_x]
 wall_x_right = [x + 1 for x in wall_x]
