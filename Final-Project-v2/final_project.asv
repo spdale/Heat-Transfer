@@ -3,7 +3,7 @@ close all
 height = 200;
 width = 500;
 
-num_time_steps = 20;
+num_time_steps = 2;
 
 cylinder_diameter = 50;
 cylinder_radius = cylinder_diameter / 2;
@@ -84,11 +84,9 @@ end
 
 
 for time_step = 1:num_time_steps
-    for i = 2: (width - 1)
-        for j = 2: (height - 1)
-            if solid_points(i, j) == 1
-                omega(i, j) = -2 / (h * h) * (psi(i - 1, j) + psi(i + 1, j) + psi(i, j - 1) + psi(i, j + 1));
-            end
+    for i = 2: (height - 1)
+        if solid_points(i, j)
+            omega(i, j) = -2 / (h * h) * (psi(i - 1, j) + psi(i + 1, j) + psi(i, j - 1) + psi(i, j + 1));
         end
     end
     
@@ -112,30 +110,31 @@ end
 
 
 
-% figure(1)
-% hold on
-% plot_data = flipud(rot90(psi));
-% s = pcolor(plot_data);
-% daspect([1 1 1]);
-% colormap(gray);
-% set(s, 'EdgeColor', 'none');
-% colorbar
-% contour(plot_data, 32, 'black');
-% 
-% hold off
-
-
-
-
-
-figure(2)
+figure(1)
 hold on
-plot_data = flipud(rot90(omega));
+plot_data = flipud(rot90(psi));
 s = pcolor(plot_data);
 daspect([1 1 1]);
 colormap(gray);
 set(s, 'EdgeColor', 'none');
 colorbar
+contour(plot_data, 32, 'black');
+
+hold off
+
+
+
+
+
+figure(1)
+hold on
+plot_data = flipud(rot90(psi));
+s = pcolor(plot_data);
+daspect([1 1 1]);
+colormap(gray);
+set(s, 'EdgeColor', 'none');
+colorbar
+contour(plot_data, 32, 'black');
 
 hold off
 
