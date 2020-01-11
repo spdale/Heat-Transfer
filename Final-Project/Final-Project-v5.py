@@ -30,7 +30,7 @@ make_video = False
 height = 200
 width = 500
 
-num_time_steps = 20
+num_time_steps = 3
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -256,7 +256,6 @@ for n in range(1, num_time_steps):
     v.fill(0)
 
     for (i, j) in solid_points:
-        # omega[i, j] = 1
         omega[i, j] = -2 / (h * h) * (psi[i + 1, j] + psi[i - 1, j] + psi[i, j + 1] + psi[i, j - 1])
 
 
@@ -283,7 +282,7 @@ for n in range(1, num_time_steps):
         omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * laplacian_vorticity)
 
 
-    # psi = gauss_seidel_iteration(psi)
+    psi = gauss_seidel_iteration(psi)
 
 
     # for (i, j) in bulk_points: 
@@ -306,58 +305,6 @@ for n in range(1, num_time_steps):
 
     # for (i, j) in bulk_points:
     #     temps[i, j] = v[i, j]
-
-
-    # u_delta_T = np.zeros((width, height))
-    # v_delta_T = np.zeros((width, height))
-    # temps_laplacian = np.zeros((width, height))
-
-    # delta_u_omega = np.zeros((width, height))
-    # delta_v_omega = np.zeros((width, height))
-
-    # vorticity_laplacian = np.zeros((width, height))
-
-    # u_delta_T = np.zeros((width, height))
-    # v_delta_T = np.zeros((width, height))
-    # temps_laplacian = np.zeros((width, height))
-
-    # u_delta_T.fill(0)
-    # v_delta_T.fill(0)
-
-    # u_neg_ind = np.nonzero(u < 0)
-    # u_pos_ind = np.nonzero(u > 0)
-    # v_neg_ind = np.nonzero(v < 0)
-    # v_pos_ind = np.nonzero(v > 0)
-
-    # u_neg_ind_right = u_neg_ind[:]
-    # u_neg_ind_right[:][1][:] += 1       # Should this be 0?
-
-    # u_pos_ind_left = u_pos_ind[:]
-    # u_pos_ind_left[:][1][:] += -1       # Should this be 0?
-
-
-    # v_neg_ind_up = v_neg_ind[:]
-    # v_neg_ind_up[:][0][:] += 1          # Should this be 1?
-
-    # v_pos_ind_down = v_pos_ind[:]
-    # v_pos_ind_down[:][0][:] += -1       # Should this be 1?
-
-
-    # u_delta_T[u_neg_ind] = u[u_neg_ind] * (temps_prev[u_neg_ind_right] - temps_prev[u_neg_ind])
-    # u_delta_T[u_pos_ind] = u[u_pos_ind] * (temps_prev[u_pos_ind] - temps_prev[u_pos_ind_left])
-
-    # v_delta_T[v_neg_ind] = v[v_neg_ind] * (temps_prev[v_neg_ind_up] - temps_prev[v_neg_ind])
-    # v_delta_T[v_pos_ind] = v[v_pos_ind] * (temps_prev[v_pos_ind] - temps_prev[v_pos_ind_down])
-
-    # temps_laplacian[CURRENT] = (temps_prev[UP] + temps_prev[DOWN] + temps_prev[LEFT] + temps_prev[RIGHT] - 4 * temps_prev[CURRENT]) / (h * h)
-
-    # temps = temps_prev + dt * ((-u_delta_T - v_delta_T) / h + alpha * temps_laplacian)
-
-    # temps[solid_rows, solid_cols] = T_surface
-    # temps[:, 0] = T_boundary
-    # temps[:, (height - 1)] = T_boundary
-
-
 
 
 
