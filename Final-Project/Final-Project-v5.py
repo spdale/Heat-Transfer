@@ -30,7 +30,7 @@ make_video = False
 height = 200
 width = 500
 
-num_time_steps = 3
+num_time_steps = 20
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -268,16 +268,16 @@ for n in range(1, num_time_steps):
         laplacian_vorticity = (omega_prev[i + 1, j] + omega_prev[i - 1, j] + omega_prev[i, j + 1] + omega_prev[i, j - 1] - 4 * omega_prev[i, j]) / (h * h)
 
         delta_u_omega = 0
-        if u[i, j] < 0:
-            delta_u_omega = u[i + 1, j] * omega_prev[i + 1, j] - u[i, j] * omega_prev[i, j]
-        elif u[i, j] > 0:
-            delta_u_omega = u[i, j] * omega_prev[i, j] - u[i - 1, j] * omega_prev[i - 1, j]
+        # if u[i, j] < 0:
+        #     delta_u_omega = u[i + 1, j] * omega_prev[i + 1, j] - u[i, j] * omega_prev[i, j]
+        # elif u[i, j] > 0:
+        #     delta_u_omega = u[i, j] * omega_prev[i, j] - u[i - 1, j] * omega_prev[i - 1, j]
 
         delta_v_omega = 0
-        if v[i, j] < 0:
-            delta_v_omega = v[i, j + 1] * omega_prev[i, j + 1] - v[i, j] * omega_prev[i, j]
-        elif v[i, j] > 0:
-            delta_v_omega = v[i, j] * omega_prev[i, j] - v[i, j - 1] * omega_prev[i, j - 1]
+        # if v[i, j] < 0:
+        #     delta_v_omega = v[i, j + 1] * omega_prev[i, j + 1] - v[i, j] * omega_prev[i, j]
+        # elif v[i, j] > 0:
+        #     delta_v_omega = v[i, j] * omega_prev[i, j] - v[i, j - 1] * omega_prev[i, j - 1]
 
         omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * laplacian_vorticity)
 
@@ -285,22 +285,22 @@ for n in range(1, num_time_steps):
     psi = gauss_seidel_iteration(psi)
 
 
-    # for (i, j) in bulk_points: 
-    #     u_delta_T = 0
-    #     if u[i, j] < 0:
-    #         u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
-    #     elif u[i, j] > 0:
-    #         u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
+    for (i, j) in bulk_points: 
+        u_delta_T = 0
+        # if u[i, j] < 0:
+        #     u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
+        # elif u[i, j] > 0:
+        #     u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
         
-    #     v_delta_T = 0
-    #     if v[i, j] < 0:
-    #         v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
-    #     elif v[i, j] > 0:
-    #         v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
+        v_delta_T = 0
+        # if v[i, j] < 0:
+        #     v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
+        # elif v[i, j] > 0:
+        #     v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
 
-    #     laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
+        laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
 
-    #     temps[i, j] = temps_prev[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
+        temps[i, j] = temps_prev[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
     
 
     # for (i, j) in bulk_points:
@@ -445,7 +445,7 @@ for plot_index in range(num_time_steps):
     #  Time Stamp
     ###############################################################
     realtime = plot_index * dt
-    realtime_str = "Time: " +  "{:.10f}".format(realtime) + " s"
+    realtime_str = "Time: " +  "{:.4f}".format(realtime) + " s"
     fig.suptitle(realtime_str, y = 0.07)
 
 
