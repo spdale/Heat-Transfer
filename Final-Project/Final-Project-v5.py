@@ -10,8 +10,6 @@ import os
 import time
 start_time = time.time()
 
-import pickle
-
 
 
 CURRENT = slice(1, -1),   slice(1, -1)
@@ -32,7 +30,7 @@ make_video = False
 height = 200
 width = 500
 
-num_time_steps = 2
+num_time_steps = 20
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
@@ -105,17 +103,23 @@ def wall_setup():
     for i in range(width):
         for j in range(height):
             if (i, j) in solid_points:
-                if (i - 1, j) not in solid_points:
+                # if (i - 1, j) not in solid_points:
+                #     wall_rows.append(i - 1)
+                #     wall_cols.append(j)
+                # elif (i + 1, j) not in solid_points:
+                #     wall_rows.append(i + 1)
+                #     wall_cols.append(j)
+                if (i, j - 1) not in solid_points:
                     wall_rows.append(i)
-                    wall_cols.append(j)
-                elif (i + 1, j) not in solid_points:
-                    wall_rows.append(i)
-                    wall_cols.append(j)
-                elif (i, j - 1) not in solid_points:
-                    wall_rows.append(i)
-                    wall_cols.append(j)
+                    wall_cols.append(j - 1)
                 elif (i, j + 1) not in solid_points:
                     wall_rows.append(i)
+                    wall_cols.append(j + 1)
+                if (i - 1, j) not in solid_points:
+                    wall_rows.append(i - 1)
+                    wall_cols.append(j)
+                elif (i + 1, j) not in solid_points:
+                    wall_rows.append(i + 1)
                     wall_cols.append(j)
     
     return list(zip(wall_rows, wall_cols))
@@ -251,52 +255,53 @@ for n in range(1, num_time_steps):
     u.fill(0)
     v.fill(0)
 
-    # for (i, j) in wall_points:
-    #     omega[i, j] = -2 / (h * h) * (psi[i + 1, j] + psi[i - 1, j] + psi[i, j + 1] + psi[i, j - 1])
+    for (i, j) in solid_points:
+        # omega[i, j] = 1
+        omega[i, j] = -2 / (h * h) * (psi[i + 1, j] + psi[i - 1, j] + psi[i, j + 1] + psi[i, j - 1])
 
 
-    # for i in range(1, width - 1):
-    #     for j in range(1, height - 1):
-    #         u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
-    #         v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
+    for i in range(1, width - 1):
+        for j in range(1, height - 1):
+            u[i, j] = (psi[i, j + 1] - psi[i, j - 1]) / (2 * h)
+            v[i, j] = (psi[i - 1, j] - psi[i + 1, j]) / (2 * h)
 
-    # for (i, j) in bulk_points:
-    #     laplacian_vorticity = (omega_prev[i + 1, j] + omega_prev[i - 1, j] + omega_prev[i, j + 1] + omega_prev[i, j - 1] - 4 * omega_prev[i, j]) / (h * h)
+    for (i, j) in bulk_points:
+        laplacian_vorticity = (omega_prev[i + 1, j] + omega_prev[i - 1, j] + omega_prev[i, j + 1] + omega_prev[i, j - 1] - 4 * omega_prev[i, j]) / (h * h)
 
-    #     delta_u_omega = 0
-    #     if u[i, j] < 0:
-    #         delta_u_omega = u[i + 1, j] * omega_prev[i + 1, j] - u[i, j] * omega_prev[i, j]
-    #     elif u[i, j] > 0:
-    #         delta_u_omega = u[i, j] * omega_prev[i, j] - u[i - 1, j] * omega_prev[i - 1, j]
+        delta_u_omega = 0
+        if u[i, j] < 0:
+            delta_u_omega = u[i + 1, j] * omega_prev[i + 1, j] - u[i, j] * omega_prev[i, j]
+        elif u[i, j] > 0:
+            delta_u_omega = u[i, j] * omega_prev[i, j] - u[i - 1, j] * omega_prev[i - 1, j]
 
-    #     delta_v_omega = 0
-    #     if v[i, j] < 0:
-    #         delta_v_omega = v[i, j + 1] * omega_prev[i, j + 1] - v[i, j] * omega_prev[i, j]
-    #     elif v[i, j] > 0:
-    #         delta_v_omega = v[i, j] * omega_prev[i, j] - v[i, j - 1] * omega_prev[i, j - 1]
+        delta_v_omega = 0
+        if v[i, j] < 0:
+            delta_v_omega = v[i, j + 1] * omega_prev[i, j + 1] - v[i, j] * omega_prev[i, j]
+        elif v[i, j] > 0:
+            delta_v_omega = v[i, j] * omega_prev[i, j] - v[i, j - 1] * omega_prev[i, j - 1]
 
-    #     omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * laplacian_vorticity)
+        omega[i, j] = omega_prev[i, j] + dt * (-delta_u_omega / h - delta_v_omega / h + nu * laplacian_vorticity)
 
 
     # psi = gauss_seidel_iteration(psi)
 
 
-    for (i, j) in bulk_points: 
-        u_delta_T = 0
-        # if u[i, j] < 0:
-        #     u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
-        # elif u[i, j] > 0:
-        #     u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
+    # for (i, j) in bulk_points: 
+    #     u_delta_T = 0
+    #     if u[i, j] < 0:
+    #         u_delta_T = u[i, j] * (temps_prev[i + 1, j] - temps_prev[i, j])
+    #     elif u[i, j] > 0:
+    #         u_delta_T = u[i, j] * (temps_prev[i, j] - temps_prev[i - 1, j])
         
-        v_delta_T = 0
-        # if v[i, j] < 0:
-        #     v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
-        # elif v[i, j] > 0:
-        #     v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
+    #     v_delta_T = 0
+    #     if v[i, j] < 0:
+    #         v_delta_T = v[i, j] * (temps_prev[i, j + 1] - temps_prev[i, j])
+    #     elif v[i, j] > 0:
+    #         v_delta_T = v[i, j] * (temps_prev[i, j] - temps_prev[i, j - 1])
 
-        laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
+    #     laplacian_temps = (temps_prev[i - 1, j] + temps_prev[i + 1, j] + temps_prev[i, j - 1] + temps_prev[i, j + 1] - 4 * temps_prev[i, j]) / (h * h)
 
-        temps[i, j] = temps_prev[i, j] + dt * (-u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
+    #     temps[i, j] = temps_prev[i, j] + dt * (- u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
     
 
     # for (i, j) in bulk_points:
