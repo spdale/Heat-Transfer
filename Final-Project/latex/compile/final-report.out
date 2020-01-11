@@ -1,0 +1,12 @@
+\BOOKMARK [1][-]{section*.1}{Executive Summary}{}% 1
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 2
+\BOOKMARK [1][-]{section.2}{Method}{}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Setup and Boundary Conditions}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Initial Psi Setup}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.3}{Wall Conditions}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.4}{Bulk Fluid}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.5}{Outflow Boundary}{section.2}% 8
+\BOOKMARK [2][-]{subsection.2.6}{Temperature Update}{section.2}% 9
+\BOOKMARK [1][-]{section.3}{Results}{}% 10
+\BOOKMARK [1][-]{section.4}{Discussion and Conclusions}{}% 11
+\BOOKMARK [1][-]{section.1}{Code Appendix}{}% 12
