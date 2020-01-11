@@ -25,8 +25,8 @@ fileName = "Final-Project"
 database_filename = "data.pickle"
 setup_database_filename = "setup_data.pickle"
 
-# final_frame_only = True
-final_frame_only = False
+final_frame_only = True
+# final_frame_only = False
 # generate_video_from_frames = True
 generate_video_from_frames = False
 
@@ -37,11 +37,11 @@ num_time_steps = 2
 
 cylinder_diameter = 50
 cylinder_radius = cylinder_diameter / 2
-cylinder_center = [(height / 2), 100]
+cylinder_center = 4l.[(height / 2), 100]
 
 error_limit = 0.01                  # 1% maximum change for convergence
 
-U_inf = 2                           # m/s uniform inflow
+U_inf = 0.01                           # m/s uniform inflow
 F = 1.9                             # over-relaxation factor
 free_lid = U_inf * (height / 2)     # free-lid streamfunction constant
 
@@ -380,7 +380,8 @@ for n in range(1, num_time_steps):
         temps[i, j] = temps_prev[i, j] + dt * (-u_delta_T / h - v_delta_T / h + alpha * laplacian_temps)
     
 
-
+    for (i, j) in bulk_points:
+        temps[i, j] = v[i, j]
 
 
     # u_delta_T = np.zeros((width, height))
