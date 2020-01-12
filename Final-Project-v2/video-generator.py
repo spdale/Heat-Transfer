@@ -13,6 +13,13 @@ video_name = output_folder + "final-project.mp4"
 fps = 10
 
 
+part_two = false
+if part_two)
+    image_folder = "C:\\Users\\samda\\Documents\\GitHub\\Heat-Transfer\\Final-Project-v2\\part-2-images"
+    output_folder = "C:\\Users\\samda\\Documents\\GitHub\\Heat-Transfer\\Final-Project-v2\\"
+    video_name = output_folder + "final-project-part-2.mp4"
+
+
 
 
 ###############################################################
