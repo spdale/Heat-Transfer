@@ -4,7 +4,10 @@ tic;
 height = 200;
 width = 500;
 
-num_time_steps = 100;
+num_time_steps = 20000;
+frame_multiple = 50;
+
+print_time_step_frequently = true;
 
 security_number = 1000;
 
@@ -34,7 +37,7 @@ h_1 = (10 - 1) * nu / U_inf;
 h_2 = (10 - 1) * alpha / U_inf;
 h = min(h_1, h_2);                   % grid spacing
 
-U_max = 5*U_inf;
+U_max = 5 * U_inf;
 
 dt = (h / U_max) / 2;
 
@@ -301,75 +304,83 @@ for time_step = 1:num_time_steps
     
     
     
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Plot Streamfunction, Vorticity, and Temperature
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    ax(1) = subplot(3,1,1);
-    hold on
-    plot_data = flipud(rot90(psi));
-    s = pcolor(plot_data);
-    daspect([1 1 1]);
-    colormap(ax(1), gray);
-    set(s, 'EdgeColor', 'none');
-    colorbar
-    contour(plot_data, 32, 'black');
-    title("Streamfunction");
-    hold off
-    
+    if mod(time_step, frame_multiple) == 0
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Plot Streamfunction, Vorticity, and Temperature
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        ax(1) = subplot(3,1,1);
+        hold on
+        plot_data = flipud(rot90(psi));
+        s = pcolor(plot_data);
+        daspect([1 1 1]);
+        colormap(ax(1), gray);
+        set(s, 'EdgeColor', 'none');
+        colorbar
+        contour(plot_data, 32, 'black');
+        title("Streamfunction");
+        hold off
 
 
 
 
 
-    ax(2) = subplot(3,1,2);
-    hold on
-    plot_data = flipud(rot90(omega));
-    s = pcolor(plot_data);
-    daspect([1 1 1]);
-    colormap(ax(2), gray);
-    set(s, 'EdgeColor', 'none');
-    colorbar
-    title("Vorticity");
-    hold off
+
+        ax(2) = subplot(3,1,2);
+        hold on
+        plot_data = flipud(rot90(omega));
+        s = pcolor(plot_data);
+        daspect([1 1 1]);
+        colormap(ax(2), gray);
+        set(s, 'EdgeColor', 'none');
+        colorbar
+        title("Vorticity");
+        hold off
 
 
 
-    ax(3) = subplot(3,1,3);
-    hold on
-    plot_data = flipud(rot90(temps));
-    s = pcolor(plot_data);
-    daspect([1 1 1]);
-    colormap(ax(3), jet);
-    set(s, 'EdgeColor', 'none');
-    colorbar
-    title("Temperature");
-    hold off
-    
-    
-    
-    
-    real_time = dt * time_step;
-    time_string = sprintf('%0.8f seconds', real_time);
-    xlabel({" ", " ", time_string});
-    
-    
-    file_name = sprintf("./images/Final-Project-%d.png", time_step);
-    saveas(gcf, file_name);
+        ax(3) = subplot(3,1,3);
+        hold on
+        plot_data = flipud(rot90(temps));
+        s = pcolor(plot_data);
+        daspect([1 1 1]);
+        colormap(ax(3), jet);
+        set(s, 'EdgeColor', 'none');
+        colorbar
+        title("Temperature");
+        hold off
 
-    clf;
-    
-    
-    
-    
-    
-    if mod(time_step, security_number) == 0
-        data_file_name = sprintf("./data/workspace-time-step-%d.mat", time_step);
-        save(data_file_name);
+
+
+
+        real_time = dt * time_step;
+        time_string = sprintf('%0.8f seconds', real_time);
+        xlabel({" ", " ", time_string});
+
+
+        file_name = sprintf("./images/Final-Project-%d.png", time_step);
+        saveas(gcf, file_name);
+
+        clf;
+
+
+
+
+
+
+
+% 
+%         total_transfer(time_step, 1) = dt * time_step;
+%         transfer_sum = 0;
+%         for i = 1:width
+%             for j = 1:height
+%                 if solid_adj_points(i, j)
+%                     transfer_sum = transfer_sum + (temps(i, j) - temps_old(i, j)) / h;
+%                 end
+%             end
+%         end
+%         total_transfer(time_step, 2) = -k * transfer_sum;
     end
-    
-    
     
     
     total_transfer(time_step, 1) = dt * time_step;
@@ -386,7 +397,17 @@ for time_step = 1:num_time_steps
     
     
     
-    disp("Time step " + time_step + " of " + num_time_steps)
+    if mod(time_step, security_number) == 0
+        data_file_name = sprintf("./data/workspace-time-step-%d.mat", time_step);
+        save(data_file_name);
+    end
+    
+    
+    if print_time_step_frequently
+        disp("Time step " + time_step + " of " + num_time_steps)
+    elseif mod(time_step, frame_multiple) == 0
+        disp("Time step " + time_step + " of " + num_time_steps)
+    end
 end
 
 
