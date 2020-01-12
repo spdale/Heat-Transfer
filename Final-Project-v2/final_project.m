@@ -4,11 +4,17 @@ tic;
 height = 200;
 width = 500;
 
-num_time_steps = 100;
+num_time_steps = 20000;
 
-omega_history = zeros(num_time_steps + 1, width, height);
-psi_history = zeros(num_time_steps + 1, width, height);
-temps_history = zeros(num_time_steps + 1, width, height);
+security_number = 1000;
+
+keep_history = true;
+
+if keep_history
+    omega_history = zeros(1000, width, height);
+    psi_history = zeros(1000, width, height);
+    temps_history = zeros(1000, width, height);
+end
 
 cylinder_diameter = 50;
 cylinder_radius = cylinder_diameter / 2;
@@ -167,10 +173,11 @@ file_name = sprintf("./images/Final-Project-%d.png", 0);
 saveas(gcf, file_name);
 
 
-omega_history(1, :, :) = omega;
-psi_history(1, :, :) = psi;
-temps_history(1, :, :) = temps;
-
+if keep_history
+    omega_history(1, :, :) = omega;
+    psi_history(1, :, :) = psi;
+    temps_history(1, :, :) = temps;
+end
 
 
 
@@ -349,19 +356,25 @@ for time_step = 1:num_time_steps
     
     
     
-    
-    
-    omega_history(time_step + 1, :, :) = omega;
-    psi_history(time_step + 1, :, :) = psi;
-    temps_history(time_step + 1, :, :) = temps;
+    if keep_history
+        omega_history(mod(time_step, security_number) + 1, :, :) = omega;
+        psi_history(mod(time_step, security_number) + 1, :, :) = psi;
+        temps_history(mod(time_step, security_number) + 1, :, :) = temps;
+    end
 
     
     
     
     
-    if mod(time_step, 1000) == 0
-        data_file_name = sprintf("./data/workspace-time-step-%d", time_step);
+    if mod(time_step, security_number) == 0
+        data_file_name = sprintf("./data/workspace-time-step-%d.mat", time_step);
         save(data_file_name);
+        
+        if keep_history
+            omega_history(:, :, :) = 0;
+            psi_history(:, :, :) = 0;
+            temps_history(:, :, :) = 0;
+        end
     end
     
     

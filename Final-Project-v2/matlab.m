@@ -1,7 +1,7 @@
 height = 200;
 width = 500;
 
-num_time_steps = 20;
+num_time_steps = 20000;
 
 cylinder_diameter = 50;
 cylinder_radius = cylinder_diameter / 2;
