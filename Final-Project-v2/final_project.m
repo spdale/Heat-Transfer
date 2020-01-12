@@ -4,17 +4,11 @@ tic;
 height = 200;
 width = 500;
 
-num_time_steps = 20000;
+num_time_steps = 100;
 
 security_number = 1000;
 
-keep_history = true;
-
-if keep_history
-    omega_history = zeros(1000, width, height);
-    psi_history = zeros(1000, width, height);
-    temps_history = zeros(1000, width, height);
-end
+total_transfer = zeros(num_time_steps, 2);
 
 cylinder_diameter = 50;
 cylinder_radius = cylinder_diameter / 2;
@@ -25,6 +19,7 @@ error_limit = 0.01;                  % 1% maximum change for convergence
 
 U_inf = 4;                           % m/s      uniform inflow
 alpha = 22.07 * 10^(-6);             % m^2/s    Thermal Diffusivity at 300K
+k = 0.02624;                         % W/(m*K)  Thermal Conductivity at 300K
 nu = 1.48 * 10^(-5);                 % m^2/s    Kinematic Viscosity at 300K
 F = 1.9;                             %          over-relaxation factor
 free_lid = U_inf * (height / 2);     %          free-lid streamfunction constant
@@ -78,6 +73,24 @@ for i = 1:width
     end
 end
 
+
+solid_adj_points = zeros(width, height);
+for i = 2:(width - 1)
+    for j = 2:(height - 1)
+        if ~solid_points(i, j)
+            
+            if (solid_points(i - 1, j) || solid_points(i + 1, j) || solid_points(i, j - 1) || solid_points(i, j + 1))
+            
+                temps(i, j) = 350;
+            end
+        end
+    end
+end
+
+
+
+
+
 u(1,:) = U_inf; 
 
 
@@ -119,8 +132,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot for t = 0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-time_step = 1;
-figure(time_step)
+figure(1)
 set(gcf, 'visible', 'off')
 set(gcf, 'Position',  [0, 0, 1080, 1080])
 ax(1) = subplot(3,1,1);
@@ -172,13 +184,7 @@ xlabel({" ", " ", time_string});
 file_name = sprintf("./images/Final-Project-%d.png", 0);
 saveas(gcf, file_name);
 
-
-if keep_history
-    omega_history(1, :, :) = omega;
-    psi_history(1, :, :) = psi;
-    temps_history(1, :, :) = temps;
-end
-
+clf;
 
 
 
@@ -186,8 +192,10 @@ end
 % Time Steps
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 for time_step = 1:num_time_steps    
     omega_old = omega;
+    temps_old = temps;
     
     % omega_wall setup
     for i = 2:(width - 1)
@@ -267,7 +275,6 @@ for time_step = 1:num_time_steps
     end
     
     % temperature update
-    temps_old = temps;
     for i = 2:(width -1)
         for j = 2:(height - 1)
             if ~solid_points(i, j)
@@ -300,9 +307,6 @@ for time_step = 1:num_time_steps
     % Plot Streamfunction, Vorticity, and Temperature
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    figure(time_step + 1)
-    set(gcf, 'visible', 'off')
-    set(gcf, 'Position',  [0, 0, 1080, 1080])
     ax(1) = subplot(3,1,1);
     hold on
     plot_data = flipud(rot90(psi));
@@ -314,6 +318,7 @@ for time_step = 1:num_time_steps
     contour(plot_data, 32, 'black');
     title("Streamfunction");
     hold off
+    
 
 
 
@@ -342,7 +347,9 @@ for time_step = 1:num_time_steps
     colorbar
     title("Temperature");
     hold off
-
+    
+    
+    
     
     real_time = dt * time_step;
     time_string = sprintf('%0.8f seconds', real_time);
@@ -352,16 +359,8 @@ for time_step = 1:num_time_steps
     file_name = sprintf("./images/Final-Project-%d.png", time_step);
     saveas(gcf, file_name);
 
+    clf;
     
-    
-    
-    
-    if keep_history
-        omega_history(mod(time_step, security_number) + 1, :, :) = omega;
-        psi_history(mod(time_step, security_number) + 1, :, :) = psi;
-        temps_history(mod(time_step, security_number) + 1, :, :) = temps;
-    end
-
     
     
     
@@ -369,14 +368,21 @@ for time_step = 1:num_time_steps
     if mod(time_step, security_number) == 0
         data_file_name = sprintf("./data/workspace-time-step-%d.mat", time_step);
         save(data_file_name);
-        
-        if keep_history
-            omega_history(:, :, :) = 0;
-            psi_history(:, :, :) = 0;
-            temps_history(:, :, :) = 0;
-        end
     end
     
+    
+    
+    
+    total_transfer(time_step, 1) = dt * time_step;
+    transfer_sum = 0;
+    for i = 1:width
+        for j = 1:height
+            if solid_adj_points(i, j)
+                transfer_sum = transfer_sum + (temps(i, j) - temps_old(i, j)) / h;
+            end
+        end
+    end
+    total_transfer(time_step, 2) = -k * transfer_sum ;
     
     
     
@@ -386,7 +392,8 @@ end
 
 
 
-
+figure(2)
+plot(total_transfer(:, 1), total_transfer(:, 2));
 
 
 toc;
