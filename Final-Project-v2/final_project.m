@@ -11,7 +11,7 @@ skip_to_time_steps = false;
 
 if skip_to_time_steps
     if part_two
-        load("./data/part-2-workspace-time-step-20000.mat");
+        load("./part-2-data/part-2-workspace-time-step-20000.mat");
     else
         load("./data/workspace-time-step-20000.mat");
     end
