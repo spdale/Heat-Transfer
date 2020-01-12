@@ -4,7 +4,11 @@ tic;
 height = 200;
 width = 500;
 
-num_time_steps = 200;
+num_time_steps = 100;
+
+omega_history = zeros(num_time_steps + 1, width, height);
+psi_history = zeros(num_time_steps + 1, width, height);
+temps_history = zeros(num_time_steps + 1, width, height);
 
 cylinder_diameter = 50;
 cylinder_radius = cylinder_diameter / 2;
@@ -110,8 +114,9 @@ end
 % Plot for t = 0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 time_step = 1;
-set(gcf, 'Position',  [0, 0, 1920, 1080])
 figure(time_step)
+set(gcf, 'visible', 'off')
+set(gcf, 'Position',  [0, 0, 1080, 1080])
 ax(1) = subplot(3,1,1);
 hold on
 plot_data = flipud(rot90(psi));
@@ -162,7 +167,9 @@ file_name = sprintf("./images/Final-Project-%d.png", 0);
 saveas(gcf, file_name);
 
 
-
+omega_history(1, :, :) = omega;
+psi_history(1, :, :) = psi;
+temps_history(1, :, :) = temps;
 
 
 
@@ -338,8 +345,28 @@ for time_step = 1:num_time_steps
     file_name = sprintf("./images/Final-Project-%d.png", time_step);
     saveas(gcf, file_name);
 
+    
+    
+    
+    
+    
+    
+    omega_history(time_step + 1, :, :) = omega;
+    psi_history(time_step + 1, :, :) = psi;
+    temps_history(time_step + 1, :, :) = temps;
 
-
+    
+    
+    
+    
+    if mod(time_step, 1000) == 0
+        data_file_name = sprintf("./data/workspace-time-step-%d", time_step);
+        save(data_file_name);
+    end
+    
+    
+    
+    
     
     disp("Time step " + time_step + " of " + num_time_steps)
 end
