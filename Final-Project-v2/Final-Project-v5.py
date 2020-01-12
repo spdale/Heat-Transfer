@@ -57,7 +57,9 @@ h_1 = (10 - 1) * nu / U_inf
 h_2 = (10 - 1) * alpha / U_inf
 h = min(h_1, h_2)                   # grid spacing
 
-dt = (h / U_inf) / 2
+U_max = U_inf / 5
+
+dt = (h / U_max) / 2
 
 # h = 0.02
 # dt = 0.2 * 10**(-3)

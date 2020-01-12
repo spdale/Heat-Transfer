@@ -1,9 +1,10 @@
 close all
 
+tic;
 height = 200;
 width = 500;
 
-num_time_steps = 5000;
+num_time_steps = 200;
 
 cylinder_diameter = 50;
 cylinder_radius = cylinder_diameter / 2;
@@ -12,7 +13,7 @@ cylinder_center_y = height / 2;
 
 error_limit = 0.01;                  % 1% maximum change for convergence
 
-U_inf = 2;                        % m/s      uniform inflow
+U_inf = 4;                           % m/s      uniform inflow
 alpha = 22.07 * 10^(-6);             % m^2/s    Thermal Diffusivity at 300K
 nu = 1.48 * 10^(-5);                 % m^2/s    Kinematic Viscosity at 300K
 F = 1.9;                             %          over-relaxation factor
@@ -26,12 +27,15 @@ T_init = min(T_surface, T_boundary); % Bulk fluid initial temp
 
 h_1 = (10 - 1) * nu / U_inf;
 h_2 = (10 - 1) * alpha / U_inf;
-h = min(h_1, h_2)       % grid spacing
+h = min(h_1, h_2);                   % grid spacing
 
 U_max = 5*U_inf;
 
-dt = (h / U_max) / 2
+dt = (h / U_max) / 2;
 
+
+disp("h  = " + h);
+disp("dt = " + dt);
 
 
 omega = zeros(width, height);
@@ -41,6 +45,10 @@ temps = zeros(width, height);
 u = zeros(width, height);
 v = zeros(width, height);
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Setup 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 solid_points = zeros(width, height);
 for i = 1:width
@@ -62,6 +70,14 @@ end
 
 u(1,:) = U_inf; 
 
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Gauss-Seidel relaxation of Psi at t = 0
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 error_flag = true;
 while error_flag
@@ -90,14 +106,76 @@ end
 
 
 
-for time_step = 1:num_time_steps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot for t = 0
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+time_step = 1;
+set(gcf, 'Position',  [0, 0, 1920, 1080])
+figure(time_step)
+ax(1) = subplot(3,1,1);
+hold on
+plot_data = flipud(rot90(psi));
+s = pcolor(plot_data);
+daspect([1 1 1]);
+colormap(ax(1), gray);
+set(s, 'EdgeColor', 'none');
+colorbar
+contour(plot_data, 32, 'black');
+title("Streamfunction");
+hold off
+
+
+
+
+
+ax(2) = subplot(3,1,2);
+hold on
+plot_data = flipud(rot90(omega));
+s = pcolor(plot_data);
+daspect([1 1 1]);
+colormap(ax(2), gray);
+set(s, 'EdgeColor', 'none');
+colorbar
+title("Vorticity");
+hold off
+
+
+
+ax(3) = subplot(3,1,3);
+hold on
+plot_data = flipud(rot90(temps));
+s = pcolor(plot_data);
+daspect([1 1 1]);
+colormap(ax(3), jet);
+set(s, 'EdgeColor', 'none');
+colorbar
+title("Temperature");
+hold off
+
+
+real_time = 0;
+time_string = sprintf('%0.8f seconds', real_time);
+xlabel({" ", " ", time_string});
+
     
-    disp("Time step " + time_step + " of " + num_time_steps)
-    
-    psi_old = psi;
+file_name = sprintf("./images/Final-Project-%d.png", 0);
+saveas(gcf, file_name);
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Time Steps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+for time_step = 1:num_time_steps    
     omega_old = omega;
-    temps_old = temps;
     
+    % omega_wall setup
     for i = 2:(width - 1)
         for j = 2:(height - 1)
             if solid_points(i, j)
@@ -106,6 +184,7 @@ for time_step = 1:num_time_steps
         end
     end
     
+    % calculate u, v matrices
     for i = 2:(width - 1)
         for j = 2:(height - 1)
             u(i, j) = (psi(i, j + 1) - psi(i, j - 1)) / (2 * h);
@@ -116,6 +195,7 @@ for time_step = 1:num_time_steps
     u(:,1)=U_inf;
     u(:,height)=U_inf;
     
+    % Bulk fluid calculations
     for i = 2:(width - 1)
         for j = 2:(height - 1)
             if ~solid_points(i, j)
@@ -148,7 +228,7 @@ for time_step = 1:num_time_steps
     omega(width, :) = omega(width - 1, :);
     
     
-    
+    % Gauss-Seidel relaxation of psi (with omega term)
     error_flag = true;
     while error_flag
         psi_old = psi;
@@ -160,8 +240,7 @@ for time_step = 1:num_time_steps
                 end
             end
         end
-
-    %     psi(0, :) = psi(3, :);
+        
 
         error_array = abs(psi - psi_old) ./ psi_old;
         error_array(isnan(error_array)) = 0;
@@ -173,6 +252,7 @@ for time_step = 1:num_time_steps
         end
     end
     
+    % temperature update
     temps_old = temps;
     for i = 2:(width -1)
         for j = 2:(height - 1)
@@ -192,7 +272,7 @@ for time_step = 1:num_time_steps
                 elseif v(i, j) > 0
                     v_delta_T = v(i, j) * (temps_old(i, j) - temps_old(i, j - 1));
                 end
-%                 
+                 
                 temps(i, j) = temps_old(i, j) + dt * (-u_delta_T / h - v_delta_T / h + alpha * laplacian_temps);
                 
             end
@@ -200,6 +280,68 @@ for time_step = 1:num_time_steps
     end
     
     
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Plot Streamfunction, Vorticity, and Temperature
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    figure(time_step + 1)
+    set(gcf, 'visible', 'off')
+    set(gcf, 'Position',  [0, 0, 1080, 1080])
+    ax(1) = subplot(3,1,1);
+    hold on
+    plot_data = flipud(rot90(psi));
+    s = pcolor(plot_data);
+    daspect([1 1 1]);
+    colormap(ax(1), gray);
+    set(s, 'EdgeColor', 'none');
+    colorbar
+    contour(plot_data, 32, 'black');
+    title("Streamfunction");
+    hold off
+
+
+
+
+
+    ax(2) = subplot(3,1,2);
+    hold on
+    plot_data = flipud(rot90(omega));
+    s = pcolor(plot_data);
+    daspect([1 1 1]);
+    colormap(ax(2), gray);
+    set(s, 'EdgeColor', 'none');
+    colorbar
+    title("Vorticity");
+    hold off
+
+
+
+    ax(3) = subplot(3,1,3);
+    hold on
+    plot_data = flipud(rot90(temps));
+    s = pcolor(plot_data);
+    daspect([1 1 1]);
+    colormap(ax(3), jet);
+    set(s, 'EdgeColor', 'none');
+    colorbar
+    title("Temperature");
+    hold off
+
+    
+    real_time = dt * time_step;
+    time_string = sprintf('%0.8f seconds', real_time);
+    xlabel({" ", " ", time_string});
+    
+    
+    file_name = sprintf("./images/Final-Project-%d.png", time_step);
+    saveas(gcf, file_name);
+
+
+
+    
+    disp("Time step " + time_step + " of " + num_time_steps)
 end
 
 
@@ -207,55 +349,4 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-figure(1)
-hold on
-plot_data = flipud(rot90(psi));
-s = pcolor(plot_data);
-daspect([1 1 1]);
-colormap(gray);
-set(s, 'EdgeColor', 'none');
-colorbar
-contour(plot_data, 32, 'black');
-title("Streamfunction");
-hold off
-
-
-
-
-
-figure(2)
-hold on
-plot_data = flipud(rot90(omega));
-s = pcolor(plot_data);
-daspect([1 1 1]);
-colormap(gray);
-set(s, 'EdgeColor', 'none');
-colorbar
-title("Vorticity");
-hold off
-
-
-
-figure(3)
-hold on
-plot_data = flipud(rot90(temps));
-s = pcolor(plot_data);
-daspect([1 1 1]);
-colormap(jet);
-set(s, 'EdgeColor', 'none');
-colorbar
-title("Temperature");
-hold off
+toc;
