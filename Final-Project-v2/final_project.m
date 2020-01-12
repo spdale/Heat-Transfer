@@ -4,7 +4,7 @@ tic;
 height = 200;
 width = 500;
 
-num_time_steps = 100;
+num_time_steps = 20000;
 
 security_number = 1000;
 
@@ -78,14 +78,13 @@ solid_adj_points = zeros(width, height);
 for i = 2:(width - 1)
     for j = 2:(height - 1)
         if ~solid_points(i, j)
-            
             if (solid_points(i - 1, j) || solid_points(i + 1, j) || solid_points(i, j - 1) || solid_points(i, j + 1))
-            
-                temps(i, j) = 350;
+                solid_adj_points(i, j) = 1;
             end
         end
     end
 end
+
 
 
 
@@ -382,7 +381,7 @@ for time_step = 1:num_time_steps
             end
         end
     end
-    total_transfer(time_step, 2) = -k * transfer_sum ;
+    total_transfer(time_step, 2) = -k * transfer_sum;
     
     
     
@@ -394,6 +393,9 @@ end
 
 figure(2)
 plot(total_transfer(:, 1), total_transfer(:, 2));
+xlabel("Time (s)");
+ylabel("Total Heat Transfer (W)");
+title("Total Heat Transfer from Cylinder");
 
 
 toc;
