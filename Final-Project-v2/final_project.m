@@ -4,7 +4,7 @@ tic;
 height = 200;
 width = 500;
 
-num_time_steps = 20000;
+num_time_steps = 100;
 
 security_number = 1000;
 
@@ -17,11 +17,11 @@ cylinder_center_y = height / 2;
 
 error_limit = 0.01;                  % 1% maximum change for convergence
 
-U_inf = 4;                           % m/s      uniform inflow
+U_inf = 5;                           % m/s      uniform inflow
 alpha = 22.07 * 10^(-6);             % m^2/s    Thermal Diffusivity at 300K
 k = 0.02624;                         % W/(m*K)  Thermal Conductivity at 300K
 nu = 1.48 * 10^(-5);                 % m^2/s    Kinematic Viscosity at 300K
-F = 1.9;                             %          over-relaxation factor
+F = 1.8;                             %          over-relaxation factor
 free_lid = U_inf * (height / 2);     %          free-lid streamfunction constant
 
 Re_D = 200;                          % Given Reynolds number
