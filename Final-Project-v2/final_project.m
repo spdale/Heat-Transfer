@@ -2,32 +2,55 @@ close all
 
 tic;
 
-skip_to_time_steps = true;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+part_two = true;
+skip_to_time_steps = false;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if skip_to_time_steps
-    load("./data/workspace-time-step-20000.mat");
+    if part_two
+        load("./data/part-2-workspace-time-step-20000.mat");
+    else
+        load("./data/workspace-time-step-20000.mat");
+    end
     
     print_time_step_frequently = false;
     security_number = 1000;
     
     old_num_time_steps = num_time_steps;
     
-    num_time_steps = 20100;
-    starting_time_step = time_step;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    num_time_steps = 20200;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    starting_time_step = time_step + 1;
     
+    if num_time_steps > old_num_time_steps
+        diff_time_steps = num_time_steps - old_num_time_steps;
+        total_transfer = padarray(total_transfer, diff_time_steps, 0, 'post');
+    end
+        
     figure(1)
     set(gcf, 'visible', 'off')
     set(gcf, 'Position',  [0, 0, 1080, 1080])
     clf;
 else
-    num_time_steps = 20000;
-    frame_multiple = 50;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    num_time_steps = 20;
+    frame_multiple = 5;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     starting_time_step = 1;
     
     height = 200;
     width = 500;
 
-    print_time_step_frequently = true;
+    print_time_step_frequently = false;
     security_number = 1000;
 
     total_transfer = zeros(num_time_steps, 2);
@@ -89,7 +112,13 @@ else
     %             psi = U_inf * j - free_lid;
                 psi(i, j) = (U_inf * j - free_lid) * h;
             end
-
+    
+            if part_two
+                if ((j == (height / 2)) && (i < 150) && (i > 100))
+                    solid_points(i, j) = 1;
+                    temps(i, j) = T_surface;
+                end
+            end
 
 
         end
@@ -202,7 +231,11 @@ else
     xlabel({" ", " ", time_string});
 
 
-    file_name = sprintf("./images/Final-Project-%d.png", 0);
+    if part_two
+        file_name = sprintf("./part-2-images/Final-Project-%d.png", 0);
+    else
+        file_name = sprintf("./images/Final-Project-%d.png", 0);
+    end
     saveas(gcf, file_name);
 
     clf;
@@ -376,8 +409,13 @@ for time_step = starting_time_step:num_time_steps
         time_string = sprintf('%0.8f seconds', real_time);
         xlabel({" ", " ", time_string});
 
+        
+        if part_two
+            file_name = sprintf("./part-2-images/Final-Project-%d.png", time_step);
+        else
+            file_name = sprintf("./images/Final-Project-%d.png", time_step);
+        end
 
-        file_name = sprintf("./images/Final-Project-%d.png", time_step);
         saveas(gcf, file_name);
 
         clf;
@@ -417,7 +455,11 @@ for time_step = starting_time_step:num_time_steps
     
     
     if mod(time_step, security_number) == 0
-        data_file_name = sprintf("./data/workspace-time-step-%d.mat", time_step);
+        if part_two
+            data_file_name = sprintf("./part-2-data/workspace-time-step-%d.mat", time_step);
+        else
+            data_file_name = sprintf("./data/workspace-time-step-%d.mat", time_step);
+        end
         save(data_file_name);
     end
     
@@ -436,7 +478,12 @@ plot(total_transfer(:, 1), total_transfer(:, 2));
 xlabel("Time (s)");
 ylabel("Total Heat Transfer (W)");
 title("Total Heat Transfer from Cylinder");
-file_name = "./Total-Heat-Transfer.png";
+
+if part_two
+    file_name = "./Total-Heat-Transfer-Part-2.png";
+else
+    file_name = "./Total-Heat-Transfer.png";
+end
 saveas(gcf, file_name);
 
 
