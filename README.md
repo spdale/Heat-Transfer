@@ -35,7 +35,7 @@ Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as th
 "Final-Project.p<i></i>y" is the project code. "Final-Project.tex" compiles the image and the code into a PDF for printing.
 
 <p align="center">
-<img alt="Final Project First Frame" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Final-Project/images/Final-Project-Figure-0.png">
+<img alt="Final Project 20,000th Time Step" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Final-Project-v2/images/Final-Project-20000.png">
 </p>
 
 ---
