@@ -10,7 +10,7 @@ start_time = time.time()
 image_folder = "C:\\Users\\samda\\Documents\\GitHub\\Heat-Transfer\\Final-Project-v2\\images"
 output_folder = "C:\\Users\\samda\\Documents\\GitHub\\Heat-Transfer\\Final-Project-v2\\"
 video_name = output_folder + "final-project.mp4"
-fps = 10
+fps = 60
 
 
 
