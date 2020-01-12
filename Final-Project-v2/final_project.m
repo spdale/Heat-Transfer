@@ -1,201 +1,220 @@
 close all
 
 tic;
-height = 200;
-width = 500;
 
-num_time_steps = 20000;
-frame_multiple = 50;
-
-print_time_step_frequently = true;
-
-security_number = 1000;
-
-total_transfer = zeros(num_time_steps, 2);
-
-cylinder_diameter = 50;
-cylinder_radius = cylinder_diameter / 2;
-cylinder_center_x = height / 2;
-cylinder_center_y = height / 2;
-
-error_limit = 0.01;                  % 1% maximum change for convergence
-
-U_inf = 5;                           % m/s      uniform inflow
-alpha = 22.07 * 10^(-6);             % m^2/s    Thermal Diffusivity at 300K
-k = 0.02624;                         % W/(m*K)  Thermal Conductivity at 300K
-nu = 1.48 * 10^(-5);                 % m^2/s    Kinematic Viscosity at 300K
-F = 1.8;                             %          over-relaxation factor
-free_lid = U_inf * (height / 2);     %          free-lid streamfunction constant
-
-Re_D = 200;                          % Given Reynolds number
-
-T_surface = 400;                     % K
-T_boundary = 300;                    % K
-T_init = min(T_surface, T_boundary); % Bulk fluid initial temp
-
-h_1 = (10 - 1) * nu / U_inf;
-h_2 = (10 - 1) * alpha / U_inf;
-h = min(h_1, h_2);                   % grid spacing
-
-U_max = 5 * U_inf;
-
-dt = (h / U_max) / 2;
-
-
-disp("h  = " + h);
-disp("dt = " + dt);
-
-
-omega = zeros(width, height);
-psi = zeros(width, height);
-temps = zeros(width, height);
-
-u = zeros(width, height);
-v = zeros(width, height);
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Setup 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-solid_points = zeros(width, height);
-for i = 1:width
-    for j = 1:height
-        dist = sqrt((i - cylinder_center_x)^2 + (j - cylinder_center_y)^2);
-        if dist <= cylinder_radius
-            solid_points(i, j) = 1;
-            temps(i, j) = T_surface;
-        else
-            temps(i, j) = T_boundary;
-%             psi = U_inf * j - free_lid;
-            psi(i, j) = (U_inf * j - free_lid) * h;
-        end
-        
-        
-        
-    end
-end
-
-
-solid_adj_points = zeros(width, height);
-for i = 2:(width - 1)
-    for j = 2:(height - 1)
-        if ~solid_points(i, j)
-            if (solid_points(i - 1, j) || solid_points(i + 1, j) || solid_points(i, j - 1) || solid_points(i, j + 1))
-                solid_adj_points(i, j) = 1;
-            end
-        end
-    end
-end
-
-
-
-
-
-
-u(1,:) = U_inf; 
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Gauss-Seidel relaxation of Psi at t = 0
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-error_flag = true;
-while error_flag
-    psi_old = psi;
+skip_to_time_steps = true;
+if skip_to_time_steps
+    load("./data/workspace-time-step-20000.mat");
     
+    print_time_step_frequently = false;
+    security_number = 1000;
+    
+    old_num_time_steps = num_time_steps;
+    
+    num_time_steps = 20100;
+    starting_time_step = time_step;
+    
+    figure(1)
+    set(gcf, 'visible', 'off')
+    set(gcf, 'Position',  [0, 0, 1080, 1080])
+    clf;
+else
+    num_time_steps = 20000;
+    frame_multiple = 50;
+    
+    starting_time_step = 1;
+    
+    height = 200;
+    width = 500;
+
+    print_time_step_frequently = true;
+    security_number = 1000;
+
+    total_transfer = zeros(num_time_steps, 2);
+
+    cylinder_diameter = 50;
+    cylinder_radius = cylinder_diameter / 2;
+    cylinder_center_x = height / 2;
+    cylinder_center_y = height / 2;
+
+    error_limit = 0.01;                  % 1% maximum change for convergence
+
+    U_inf = 5;                           % m/s      uniform inflow
+    alpha = 22.07 * 10^(-6);             % m^2/s    Thermal Diffusivity at 300K
+    k = 0.02624;                         % W/(m*K)  Thermal Conductivity at 300K
+    nu = 1.48 * 10^(-5);                 % m^2/s    Kinematic Viscosity at 300K
+    F = 1.8;                             %          over-relaxation factor
+    free_lid = U_inf * (height / 2);     %          free-lid streamfunction constant
+
+    Re_D = 200;                          % Given Reynolds number
+
+    T_surface = 400;                     % K
+    T_boundary = 300;                    % K
+    T_init = min(T_surface, T_boundary); % Bulk fluid initial temp
+
+    h_1 = (10 - 1) * nu / U_inf;
+    h_2 = (10 - 1) * alpha / U_inf;
+    h = min(h_1, h_2);                   % grid spacing
+
+    U_max = 5 * U_inf;
+
+    dt = (h / U_max) / 2;
+
+
+    disp("h  = " + h);
+    disp("dt = " + dt);
+
+
+    omega = zeros(width, height);
+    psi = zeros(width, height);
+    temps = zeros(width, height);
+
+    u = zeros(width, height);
+    v = zeros(width, height);
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Setup 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    solid_points = zeros(width, height);
+    for i = 1:width
+        for j = 1:height
+            dist = sqrt((i - cylinder_center_x)^2 + (j - cylinder_center_y)^2);
+            if dist <= cylinder_radius
+                solid_points(i, j) = 1;
+                temps(i, j) = T_surface;
+            else
+                temps(i, j) = T_boundary;
+    %             psi = U_inf * j - free_lid;
+                psi(i, j) = (U_inf * j - free_lid) * h;
+            end
+
+
+
+        end
+    end
+
+
+    solid_adj_points = zeros(width, height);
     for i = 2:(width - 1)
         for j = 2:(height - 1)
-            if ~solid_points(i,j)
-                psi(i, j) = psi(i, j) + (F / 4) * (psi(i - 1, j) + psi(i + 1, j) + psi(i, j - 1) + psi(i, j + 1) - 4 * psi(i, j));
+            if ~solid_points(i, j)
+                if (solid_points(i - 1, j) || solid_points(i + 1, j) || solid_points(i, j - 1) || solid_points(i, j + 1))
+                    solid_adj_points(i, j) = 1;
+                end
             end
         end
     end
-    
-%     psi(0, :) = psi(3, :);
-    
-    error_array = abs(psi - psi_old) ./ psi_old;
-    error_array(isnan(error_array)) = 0;
-    
-    error_term = max(error_array);
-    
-    if (error_term <= error_limit)
-        error_flag = false;
+
+
+
+
+
+
+    u(1,:) = U_inf; 
+
+
+
+
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Gauss-Seidel relaxation of Psi at t = 0
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    error_flag = true;
+    while error_flag
+        psi_old = psi;
+
+        for i = 2:(width - 1)
+            for j = 2:(height - 1)
+                if ~solid_points(i,j)
+                    psi(i, j) = psi(i, j) + (F / 4) * (psi(i - 1, j) + psi(i + 1, j) + psi(i, j - 1) + psi(i, j + 1) - 4 * psi(i, j));
+                end
+            end
+        end
+
+    %     psi(0, :) = psi(3, :);
+
+        error_array = abs(psi - psi_old) ./ psi_old;
+        error_array(isnan(error_array)) = 0;
+
+        error_term = max(error_array);
+
+        if (error_term <= error_limit)
+            error_flag = false;
+        end
+
     end
-    
+
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Plot for t = 0
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    figure(1)
+    set(gcf, 'visible', 'off')
+    set(gcf, 'Position',  [0, 0, 1080, 1080])
+    ax(1) = subplot(3,1,1);
+    hold on
+    plot_data = flipud(rot90(psi));
+    s = pcolor(plot_data);
+    daspect([1 1 1]);
+    colormap(ax(1), gray);
+    set(s, 'EdgeColor', 'none');
+    colorbar
+    contour(plot_data, 32, 'black');
+    title("Streamfunction");
+    hold off
+
+
+
+
+
+    ax(2) = subplot(3,1,2);
+    hold on
+    plot_data = flipud(rot90(omega));
+    s = pcolor(plot_data);
+    daspect([1 1 1]);
+    colormap(ax(2), gray);
+    set(s, 'EdgeColor', 'none');
+    colorbar
+    title("Vorticity");
+    hold off
+
+
+
+    ax(3) = subplot(3,1,3);
+    hold on
+    plot_data = flipud(rot90(temps));
+    s = pcolor(plot_data);
+    daspect([1 1 1]);
+    colormap(ax(3), jet);
+    set(s, 'EdgeColor', 'none');
+    colorbar
+    title("Temperature");
+    hold off
+
+
+    real_time = 0;
+    time_string = sprintf('%0.8f seconds', real_time);
+    xlabel({" ", " ", time_string});
+
+
+    file_name = sprintf("./images/Final-Project-%d.png", 0);
+    saveas(gcf, file_name);
+
+    clf;
+
 end
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plot for t = 0
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(1)
-set(gcf, 'visible', 'off')
-set(gcf, 'Position',  [0, 0, 1080, 1080])
-ax(1) = subplot(3,1,1);
-hold on
-plot_data = flipud(rot90(psi));
-s = pcolor(plot_data);
-daspect([1 1 1]);
-colormap(ax(1), gray);
-set(s, 'EdgeColor', 'none');
-colorbar
-contour(plot_data, 32, 'black');
-title("Streamfunction");
-hold off
-
-
-
-
-
-ax(2) = subplot(3,1,2);
-hold on
-plot_data = flipud(rot90(omega));
-s = pcolor(plot_data);
-daspect([1 1 1]);
-colormap(ax(2), gray);
-set(s, 'EdgeColor', 'none');
-colorbar
-title("Vorticity");
-hold off
-
-
-
-ax(3) = subplot(3,1,3);
-hold on
-plot_data = flipud(rot90(temps));
-s = pcolor(plot_data);
-daspect([1 1 1]);
-colormap(ax(3), jet);
-set(s, 'EdgeColor', 'none');
-colorbar
-title("Temperature");
-hold off
-
-
-real_time = 0;
-time_string = sprintf('%0.8f seconds', real_time);
-xlabel({" ", " ", time_string});
-
-    
-file_name = sprintf("./images/Final-Project-%d.png", 0);
-saveas(gcf, file_name);
-
-clf;
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Time Steps
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-for time_step = 1:num_time_steps    
+for time_step = starting_time_step:num_time_steps    
     omega_old = omega;
     temps_old = temps;
     
@@ -417,6 +436,8 @@ plot(total_transfer(:, 1), total_transfer(:, 2));
 xlabel("Time (s)");
 ylabel("Total Heat Transfer (W)");
 title("Total Heat Transfer from Cylinder");
+file_name = "./Total-Heat-Transfer.png";
+saveas(gcf, file_name);
 
 
 toc;
