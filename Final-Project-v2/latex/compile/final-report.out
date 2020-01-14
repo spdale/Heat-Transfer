@@ -1,12 +1,17 @@
 \BOOKMARK [1][-]{section*.1}{Executive Summary}{}% 1
-\BOOKMARK [1][-]{section.1}{Introduction}{}% 2
-\BOOKMARK [1][-]{section.2}{Method}{}% 3
-\BOOKMARK [2][-]{subsection.2.1}{Setup and Boundary Conditions}{section.2}% 4
-\BOOKMARK [2][-]{subsection.2.2}{Initial Psi Setup}{section.2}% 5
-\BOOKMARK [2][-]{subsection.2.3}{Wall Conditions}{section.2}% 6
-\BOOKMARK [2][-]{subsection.2.4}{Bulk Fluid}{section.2}% 7
-\BOOKMARK [2][-]{subsection.2.5}{Outflow Boundary}{section.2}% 8
-\BOOKMARK [2][-]{subsection.2.6}{Temperature Update}{section.2}% 9
-\BOOKMARK [1][-]{section.3}{Results}{}% 10
-\BOOKMARK [1][-]{section.4}{Discussion and Conclusions}{}% 11
-\BOOKMARK [1][-]{section.1}{Code Appendix}{}% 12
+\BOOKMARK [1][-]{section.1}{Method}{}% 2
+\BOOKMARK [2][-]{subsection.1.1}{Setup and Boundary Conditions}{section.1}% 3
+\BOOKMARK [2][-]{subsection.1.2}{Initial Psi Setup}{section.1}% 4
+\BOOKMARK [2][-]{subsection.1.3}{Wall Conditions}{section.1}% 5
+\BOOKMARK [2][-]{subsection.1.4}{Bulk Fluid}{section.1}% 6
+\BOOKMARK [2][-]{subsection.1.5}{Outflow Boundary}{section.1}% 7
+\BOOKMARK [2][-]{subsection.1.6}{Temperature Update}{section.1}% 8
+\BOOKMARK [2][-]{subsection.1.7}{Calculate Total Heat Transfer from Cylinder}{section.1}% 9
+\BOOKMARK [2][-]{subsection.1.8}{Method Discussion}{section.1}% 10
+\BOOKMARK [1][-]{section.2}{Results}{}% 11
+\BOOKMARK [2][-]{subsection.2.1}{Part 1}{section.2}% 12
+\BOOKMARK [2][-]{subsection.2.2}{Part 2}{section.2}% 13
+\BOOKMARK [1][-]{section.3}{Discussion and Conclusions}{}% 14
+\BOOKMARK [1][-]{section.1}{Code Appendix}{}% 15
+\BOOKMARK [2][-]{subsection.1.1}{Main Code \(Matlab\)}{section.1}% 16
+\BOOKMARK [2][-]{subsection.1.2}{Video Generation Code \(Python\)}{section.1}% 17

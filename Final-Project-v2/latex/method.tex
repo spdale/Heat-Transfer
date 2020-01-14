@@ -10,10 +10,13 @@
 \end{equation}
 
 \begin{equation}
+    U_{max} = 5 U_{inf}
+\end{equation}
+\begin{equation}
     \Delta t \leq \frac{h}{U_{max}}
 \end{equation}
 \begin{equation}
-    \Delta t = \frac{h}{2 U_{inf}}
+    \Delta t = \frac{h}{2 U_{max}}
 \end{equation}
 
 \begin{equation}
@@ -23,7 +26,7 @@
     \psi_{i, j} = j U_{inf} - \psi_{free lid}
 \end{equation}
 \begin{equation}
-    \psi_{solid} = \psi_{free ;id} = 0
+    \psi_{solid} = \psi_{free lid} = 0
 \end{equation}
 
 \begin{equation}
@@ -41,7 +44,7 @@
 
 \subsection{Wall Conditions}
 \begin{equation}
-    \omega_{w} = -2\frac{\psi_{w + 1} - \psi_{w}}{h^2}
+    \omega_{w} = -2\frac{\psi_{w + 1} - \psi_{w}}{h^2} = \frac{-2(\psi_{i - 1, j} + \psi_{i + 1, j} + \psi_{i, j -1} + \psi_{i, j + 1})}{h^2}
 \end{equation}
 
 
@@ -97,7 +100,7 @@
 \end{equation}
 
 \begin{equation}
-    \psi_{i, j}^{k + 1} =  \psi_{i, j}^{k + 1} + \frac{F}{4} \left( \psi_{i + 1, j}^{k} + \psi_{i - 1, j}^{k + 1} + \psi_{i, j + 1}^{k} + \psi_{i, j - 1}^{k + 1} + 4 h^2 \omega_{i, j}^{n + 1} - 4\psi_{i, j}^{k} \right)
+    \psi_{i, j}^{k + 1} =  \psi_{i, j}^{k} + \frac{F}{4} \left( \psi_{i + 1, j}^{k} + \psi_{i - 1, j}^{k + 1} + \psi_{i, j + 1}^{k} + \psi_{i, j - 1}^{k + 1} + 4 h^2 \omega_{i, j}^{n + 1} - 4\psi_{i, j}^{k} \right)
 \end{equation}
 
 \subsection{Outflow Boundary}
@@ -144,4 +147,40 @@ Upper/Lower Boundaries:
     T_{i, j}^{n + 1} = T_{i, j}^{n} + \Delta t \left( -\frac{u_{i, j}^{n} (\Delta T)_{i, j}^{n}}{h} - \frac{ v_{i, j}^{n} (\Delta T)_{i, j}^{n}}{h} + \alpha \nabla^2 T_{i, j}^{n} \right)
 \end{equation}
 
+
+
+
+\subsection{Calculate Total Heat Transfer from Cylinder}
+\begin{equation}
+    T(t) = -k \frac{\partial T}{\partial n}
+\end{equation}
+
+
+\subsection{Method Discussion}
+In this project, there were a number of issues. The group started as two separate groups (Sam \& Morgan, Jens). The code was written separately at first (Sam \& Morgan in Python, Jens in Java and then in Python) On January $10^{th}$, both groups were having similar issues related to Python's slow run-times on brute force algorithms. The groups attempted to speed up the programs by implementing techniques such as using slices and Cython. These were either ineffective or not friendly to beginners. Sam and Morgan's code was having issues with the x-velocity and y-velocity matrices as the upstream values would diverge. Jens' code was having problems with the vorticity values not spreading into the flow as desired which was made worse by the slow run-times making the code difficult to debug. \\
+
+It was at this point that the two groups decided to join into one and tackle the problems together. To tackle the slow run-times, the group decided to completely re-write all the code in MATLAB. This programming language was found to be more intuitive and relatively speedy due to the fact that a number of hours had already been spent working on the project, so it was a case of putting the group's heads together to make sure no careless errors were made while writing the code again. After writing the code in MATLAB, there were some issues since the values for vorticity were getting very large after just a few iterations of the time step. After some debugging, the problems in the code were found and fixed. \\
+
+Code debugging was a major issue throughout this project. Hours were spent attempting to find solutions to the individual problems, and both Professor Nosenchuck and Ben were contacted multiple times for assistance.  However, the separate efforts of the initial two groups were not enough to produce properly functioning code.  Therefore, the decision to join together was invaluable to the success of this assignment.  Rewriting the code as a collective effort in MATLAB allowed for problems to be found quickly, and time was used much more efficiently. \\
+
+The results were validated by first comparing the videos that were produced to ones found for similar flows online and also to the one that was shown  by Professor Nosenchuck in lecture. Finding lots of similarities would give us a level of confidence that our simulation is valid. We also checked the energy conservation of the flow once it had reached steady state. This means checking the energy flowing out from the cylinder is equal to the energy flowing through the outflow boundary. \\
+
+Elements that were significant to this project that the group did not produce was the filename sorting algorithm used by the video generation Python file. This algorithm was found on Stack Overflow. A number of MATLAB and Python functions were also used with regards to plotting and formatting that the group did not write. \\
+
+
+
+
+
+
 \clearpage
+
+
+
+
+
+
+
+
+
+
+

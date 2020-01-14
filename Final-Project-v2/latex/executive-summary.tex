@@ -2,7 +2,11 @@
 \addcontentsline{toc}{section}{Executive Summary}
 
 
-\lipsum
+The goals for this project were to first simulate a viscous, low Reynolds number flow around a cylinder (Part 1) and then simulate a similar flow around an arbitrary geometry (Part 2). In Part 2, the group was  interested in determining if the heat transfer increased due to the addition of a line of solid material attached to the downstream side of the cylinder at the center line. The first part of this project was used to make sure that there was a working simulation, which could test a more interesting geometry in Part 2. As a result, most of the coding work was spent on Part 1.\\
+
+For this project, the hypothesis was that the heat transfer would increase due to the reduction in separation of the flow on the downstream side of the cylinder. The main assumptions and restrictions were that the flow is of a low Reynolds number and there is only two-dimensional heat transfer. The method used was a two-dimensional stream-function/vorticity finite difference model of governing equations with a Cartesian basis.\\
 
 
-\newpage
+The flow over a heated cylinder (Part 1) produced a flow with trailing vortices with an associated Strouhal number of 0.241.  The investigation of adding a line of solid material to the downstream side of the cylinder (Part 2) resulted in a Strouhal number of 0.238.  This decrease in the Strouhal number between the two parts indicates that the line has slightly reduced the number of vortices created. In the simulations that were produced, it can be seen when comparing the flows of Part 1 and Part 2 that the vortices are smaller and begin further downstream in Part 2. The bigger change is that of the average heat transferred from Part 1 where the average power was 6.6W and increased to 9W in Part 2 with the addition of the fin. 
+
+\clearpage
