@@ -4,7 +4,7 @@ Code for MAE 423 Heat Transfer (Fall 2019-20).
 
 ## Final Project
 **Team Members**: Morgan Baker, Jens Clausen, and Sam Dale  
-**Programming Language**: MATLAB  
+**Programming Language**: MATLAB  <br/><br/>
 **[Final Report][8]**  
 **[Part I Video][9]**  
 **[Part II Video][10]**  
