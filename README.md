@@ -2,8 +2,20 @@
 Code for MAE 423 Heat Transfer (Fall 2019-20). 
 ***
 
-## Code Overview
+## Final Project
+Numerically simulate 2D unsteady heat convection from bodies of arbitrary geometry. Use the Streamfunction-Vorticity(ψ-ω) method for an unsteady, incompressible, viscous flow at relatively low Reynolds numbers (and negligible 3D effects).
 
+Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as the initial condition for the viscous simulation. Use the velocity (u,v) and vorticity (ω) fields as inputs into the unsteady energy equation (in finite-difference form) to determine the heat transfer and diffusion at each timestep. 
+
+Project Folder
+"Final-Project.p<i></i>y" is the project code. "Final-Project.tex" compiles the image and the code into a PDF for printing.
+
+<p align="center">
+<img alt="Final Project 20,000th Time Step" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Final-Project-v2/images/Final-Project-20000.png">
+</p>
+
+---
+## Code Overview
 ### P-Set 3
 Use Gauss-Seidel Iteration to relax the temperature to reach equilibrium for data points. "PSet-3.p<i></i>y" is the project code. "p-set-3-code.tex" compiles images and the code into a PDF for printing.
 
@@ -27,16 +39,6 @@ Establish an initial flow around the circular cylinder. Use the boundary conditi
 <img alt="PSet-6 Final Image" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Problem-Set-6/images/Problem-Set-6-Figure.png">
 </p>
 
-### Final Project
-Numerically simulate 2D unsteady heat convection from bodies of arbitrary geometry. Use the Streamfunction-Vorticity(ψ-ω) method for an unsteady, incompressible, viscous flow at relatively low Reynolds numbers (and negligible 3D effects).
-
-Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as the initial condition for the viscous simulation. Use the velocity (u,v) and vorticity (ω) fields as inputs into the unsteady energy equation (in finite-difference form) to determine the heat transfer and diffusion at each timestep. 
-
-"Final-Project.p<i></i>y" is the project code. "Final-Project.tex" compiles the image and the code into a PDF for printing.
-
-<p align="center">
-<img alt="Final Project 20,000th Time Step" src="https://raw.githubusercontent.com/sdale28/Heat-Transfer/master/Final-Project-v2/images/Final-Project-20000.png">
-</p>
 
 ---
 ## Python Package Installs
