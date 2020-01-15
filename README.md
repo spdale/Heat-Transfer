@@ -3,6 +3,14 @@ Code for MAE 423 Heat Transfer (Fall 2019-20).
 ***
 
 ## Final Project
+<center>
+**Team Members**: Morgan Baker, Jens Clausen, and Sam Dale  
+**Programming Language**: MATLAB  
+**[Final Report][8]**  
+**[Part I Video][9]**  
+**[Part II Video][10]**  
+</center>
+
 Numerically simulate 2D unsteady heat convection from bodies of arbitrary geometry. Use the Streamfunction-Vorticity(ψ-ω) method for an unsteady, incompressible, viscous flow at relatively low Reynolds numbers (and negligible 3D effects).
 
 Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as the initial condition for the viscous simulation. Use the velocity (u,v) and vorticity (ω) fields as inputs into the unsteady energy equation (in finite-difference form) to determine the heat transfer and diffusion at each timestep. 
@@ -10,14 +18,15 @@ Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as th
 
 - **Team Members**: Morgan Baker, Jens Clausen, and Sam Dale
 - **Programming Language**: MATLAB
-- **[Part I Video][8]**
-- **[Part II Video][9]** <br/>
+- **[Final Report][8]**
+- **[Part I Video][9]**
+- **[Part II Video][10]** <br/>
 
 <!-- <br/> -->
 
 - **Project Folder**: "Final-Project-v2"  
 - **Main Code**: "final_project.m"
-- **Video Generator**: "video-generator.py"
+- **Video Generator**: "video-generator.p<i></i>y"
 - **Latex File**: "Final-Project.tex" 
 
 <br/>
@@ -118,5 +127,6 @@ Helpful Git Terms:
 [5]:https://marketplace.visualstudio.com/items?itemName=ms-python.python
 [6]:mailto:sdale@princeton.edu
 [7]:https://github.com/sdale28/Heat-Transfer/settings/collaboration
-[8]:https://youtu.be/Va4I72YeALE
-[9]:https://youtu.be/b8tadgjrUlY
+[8]:https://github.com/sdale28/Heat-Transfer/raw/master/Final-Project-v2/latex/compile/final-report.pdf
+[9]:https://youtu.be/Va4I72YeALE
+[10]:https://youtu.be/b8tadgjrUlY
