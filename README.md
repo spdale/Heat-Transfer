@@ -5,7 +5,7 @@ Code for MAE 423 Heat Transfer (Fall 2019-20).
 ## Final Project
 Numerically simulate 2D unsteady heat convection from bodies of arbitrary geometry. Use the Streamfunction-Vorticity(ψ-ω) method for an unsteady, incompressible, viscous flow at relatively low Reynolds numbers (and negligible 3D effects).
 
-Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as the initial condition for the viscous simulation. Use the velocity (u,v) and vorticity (ω) fields as inputs into the unsteady energy equation (in finite-difference form) to determine the heat transfer and diffusion at each timestep. 
+Use the inviscid solution (∇ψ<sup>2</sup>=0) of the streamfunction (ψ) as the initial condition for the viscous smulation. Use the velocity (u,v) and vorticity (ω) fields as inputs into the unsteady energy equation (in finite-difference form) to determine the heat transfer and diffusion at each timestep. 
 
 Project Folder
 "Final-Project.p<i></i>y" is the project code. "Final-Project.tex" compiles the image and the code into a PDF for printing.
